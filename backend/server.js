@@ -37,6 +37,9 @@ app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use('/api/feedback', require('./routes/feedbackRoutes')); // Add this line
 app.use('/api/user/favorites', require('./routes/favoriteRoutes'));
 
+// Make io instance available to our routes
+app.set('io', io);
+
 // Socket.io chat functionality
 const messages = [];
 const conversations = {};
@@ -44,14 +47,13 @@ const connectedUsers = {};
 const onlineUsers = [];
 
 io.on('connection', (socket) => {
-  console.log('New client connected');
+  // console.log('New client connected'); // Remove this line
   
   // Send previous messages to client
   socket.emit('previousMessages', messages);
   
   // Admin connection
   socket.on('adminConnected', (data) => {
-    console.log('Admin connected:', data.adminName);
     socket.isAdmin = true;
     socket.adminId = data.adminId;
     socket.adminName = data.adminName;
@@ -144,7 +146,7 @@ io.on('connection', (socket) => {
   });
   
   socket.on('disconnect', () => {
-    console.log('Client disconnected');
+    // console.log('Client disconnected'); // Remove this line
     
     // Remove from online users if it was a user
     if (socket.userId) {

@@ -26,12 +26,6 @@ export const uploadFrame = async (frameData) => {
     });
   }
   
-  // For debugging, log the contents of the formData
-  console.log('FormData contents:');
-  for (const pair of formData.entries()) {
-    console.log(pair[0], pair[1]);
-  }
-  
   const response = await api.post('/frames', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
@@ -41,11 +35,15 @@ export const uploadFrame = async (frameData) => {
   return response.data;
 };
 
-export const getFrames = async (page = 1, pageSize = 12, keyword = '', prioritySort = true) => {
-  const response = await api.get(
-    `/frames?page=${page}&pageSize=${pageSize}&keyword=${keyword}`, { params: { prioritySort } }
-  );
-  return response.data;
+export const getFrames = async (page = 1, limit = 9, brand = '', prioritySort = false) => {
+  try {
+    const response = await api.get(
+      `/frames?page=${page}&limit=${limit}&brand=${brand}`, { params: { prioritySort } }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
 };
 
 export const getFrameById = async (id) => {
@@ -81,7 +79,6 @@ export const updateFramePriority = async (id, priority) => {
   try {
     // Ensure priority is a number
     const priorityNum = Number(priority);
-    console.log(`Updating priority for product ${id} to ${priorityNum}`);
     
     // Use explicit content-type header to prevent multer from trying to parse as multipart
     const { data } = await api.put(`/frames/${id}/priority`, 
@@ -89,7 +86,6 @@ export const updateFramePriority = async (id, priority) => {
       { headers: { 'Content-Type': 'application/json' }}
     );
     
-    console.log('Priority update response:', data);
     return data;
   } catch (error) {
     console.error('Priority update error details:', error.response?.data || error.message);

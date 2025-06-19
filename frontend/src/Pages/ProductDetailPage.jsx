@@ -112,7 +112,7 @@ const ProductDetailPage = () => {
     setTryOnModalOpen(false);
     // Give time for the modal to clean up resources
     setTimeout(() => {
-      console.log("Modal closed and resources cleaned up");
+      // console.log("Modal closed and resources cleaned up"); // Remove this line
     }, 100);
   };
 

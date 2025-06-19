@@ -6,15 +6,28 @@ const User = require('../models/userModel');
 // @access  Private/Admin
 const createNotification = async (req, res) => {
   try {
-    const { recipient, message, type, link } = req.body;
+    const { recipient, message, type } = req.body;
     
     // Create notification
     const notification = await Notification.create({
       recipient,
       message,
-      type,
-      link
+      type
     });
+    
+    // If we're using Socket.io, emit a message to the user
+    if (req.app.get('io')) {
+      const io = req.app.get('io');
+      io.emit('newMessage', {
+        notification: true,
+        recipient: recipient,
+        content: message,
+        type: type,
+        sender: 'System',
+        timestamp: new Date(),
+        isAdmin: true
+      });
+    }
     
     res.status(201).json(notification);
   } catch (error) {

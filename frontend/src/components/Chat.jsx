@@ -52,15 +52,35 @@ const Chat = () => {
     
     // Function to handle new messages
     const handleNewMessage = (message) => {
+      // console.log("Received message:", message); // Remove this line
+      
+      // Special handling for system notifications
+      if (message.notification && user && message.recipient === user._id) {
+        // Format the notification as a chat message
+        const notificationMessage = {
+          content: message.content,
+          sender: 'System',
+          timestamp: message.timestamp,
+          type: message.type || 'system',
+          isAdmin: true
+        };
+        
+        setMessages(prev => [...prev, notificationMessage]);
+        
+        if (!isOpen) {
+          setUnreadCount(prev => prev + 1);
+        }
+        return;
+      }
+      
+      // Original message handling logic for regular chat messages
       if (
         message.userId === (user?._id || 'guest') || 
         message.recipientId === (user?._id || 'guest')
       ) {
-        // Only add if it's a message to/from this user
         setMessages(prev => [...prev, message]);
         
-        // If chat is closed and message is from admin to user, increase unread count
-        if (!isOpen && message.isAdmin && user && message.recipientId === user._id) {
+        if (!isOpen && user && message.recipientId === user._id) {
           setUnreadCount(prev => prev + 1);
         }
       }
@@ -70,10 +90,21 @@ const Chat = () => {
     socket.on('previousMessages', handlePreviousMessages);
     socket.on('newMessage', handleNewMessage);
     
+    // Log socket connection status
+    socket.on('connect', () => {
+      // console.log('Socket connected successfully'); // Remove this line
+    });
+
+    socket.on('connect_error', (error) => {
+      console.error('Socket connection error:', error);
+    });
+    
     // Clean up event listeners
     return () => {
       socket.off('previousMessages', handlePreviousMessages);
       socket.off('newMessage', handleNewMessage);
+      socket.off('connect');
+      socket.off('connect_error');
     };
   }, [socket, user, isOpen]);
   
@@ -151,7 +182,10 @@ const Chat = () => {
             >
               <div
                 className={`max-w-3/4 rounded-lg p-3 ${
-                  msg.userId === (user?._id || 'guest') ? 'bg-black text-white' : 'bg-gray-100'
+                  msg.userId === (user?._id || 'guest') ? 'bg-black text-white' : 
+                  msg.type === 'system' ? 'bg-blue-100 border-l-4 border-blue-500' :
+                  msg.type === 'appointment' ? 'bg-green-100 border-l-4 border-green-500' :
+                  'bg-gray-100'
                 }`}
               >
                 <p className="text-sm">{msg.content}</p>

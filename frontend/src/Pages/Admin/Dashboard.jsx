@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { getAppointments } from '../../services/appointmentService';
+import { 
+  getAppointments, 
+  updateAppointmentStatus, 
+  deleteAppointment 
+} from '../../services/appointmentService';
 import { getUsers } from '../../services/userService';
 import { getFrames } from '../../services/frameService';
 import { createNotification } from '../../services/notificationService';
@@ -11,8 +15,8 @@ const AdminDashboard = () => {
   const [stats, setStats] = useState({
     appointments: 0,
     users: 0,
-    products: 0,
-    revenue: 0
+    products: 0
+    // Remove revenue property
   });
   
   const [recentAppointments, setRecentAppointments] = useState([]);
@@ -21,44 +25,33 @@ const AdminDashboard = () => {
   const [notificationData, setNotificationData] = useState({
     recipient: '',
     message: '',
-    type: 'system',
-    link: ''
+    type: 'system'
+    // Removed link property
   });
   const [users, setUsers] = useState([]);
+  const [appointmentToDelete, setAppointmentToDelete] = useState(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
         
-        // Fetch all required data concurrently
-        const [appointmentsData, usersData, framesData] = await Promise.all([
-          getAppointments(),
-          getUsers(),
-          getFrames()
-        ]);
+        const appointmentsData = await getAppointments(1, 5);
+        const usersData = await getUsers();
+        const framesData = await getFrames(); // Make sure this is being called
         
+        setRecentAppointments(appointmentsData.slice(0, 5));
         setUsers(usersData);
         
-        // Calculate stats
-        const totalRevenue = calculateRevenue(appointmentsData, framesData);
-        
-        // Set state with fetched data
+        // Ensure products count is correctly set
         setStats({
-          appointments: appointmentsData.length,
-          users: usersData.length,
-          products: framesData.length,
-          revenue: totalRevenue
+          appointments: appointmentsData.length || 0,
+          users: usersData.length || 0,
+          products: Array.isArray(framesData.frames) ? framesData.frames.length : 
+                   (framesData && framesData.length ? framesData.length : 0)
         });
-        
-        // Get recent appointments for the dashboard
-        const recent = appointmentsData
-          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-          .slice(0, 5);
-        setRecentAppointments(recent);
-        
       } catch (error) {
-        toast.error('Failed to load dashboard data');
         console.error('Error loading dashboard data:', error);
       } finally {
         setLoading(false);
@@ -67,17 +60,6 @@ const AdminDashboard = () => {
     
     fetchDashboardData();
   }, []);
-
-  const calculateRevenue = (appointments, frames) => {
-    // Example revenue calculation
-    const appointmentRevenue = appointments.reduce((sum, appointment) => {
-      return appointment.status === 'Confirmed' ? sum + 50 : sum;
-    }, 0);
-    
-    const productRevenue = 0; // Implement based on your orders logic
-    
-    return appointmentRevenue + productRevenue;
-  };
 
   // Navigate to add new product page
   const handleNewProduct = () => {
@@ -95,8 +77,8 @@ const AdminDashboard = () => {
     setNotificationData({
       recipient: '',
       message: '',
-      type: 'system',
-      link: ''
+      type: 'system'
+      // Removed link property
     });
   };
   
@@ -121,6 +103,49 @@ const AdminDashboard = () => {
     }
   };
 
+  // Open delete confirmation modal
+  const openDeleteModal = (appointment) => {
+    setAppointmentToDelete(appointment);
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDelete = (appointment) => {
+    setAppointmentToDelete(appointment);
+    setIsDeleteModalOpen(true);
+  };
+
+  // Close delete confirmation modal
+  const closeDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+    setAppointmentToDelete(null);
+  };
+
+  // Delete appointment
+  const handleDeleteAppointment = async () => {
+    if (appointmentToDelete) {
+      try {
+        await deleteAppointment(appointmentToDelete._id);
+        
+        // Update the recentAppointments state to remove the deleted appointment
+        setRecentAppointments(prevAppointments => 
+          prevAppointments.filter(apt => apt._id !== appointmentToDelete._id)
+        );
+        
+        // Update stats
+        setStats(prev => ({
+          ...prev,
+          appointments: prev.appointments - 1
+        }));
+        
+        toast.success('Appointment removed successfully');
+        closeDeleteModal();
+      } catch (error) {
+        toast.error('Failed to delete appointment');
+        console.error('Error deleting appointment:', error);
+      }
+    }
+  };
+
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">Admin Dashboard</h1>
@@ -132,7 +157,7 @@ const AdminDashboard = () => {
       ) : (
         <>
           {/* Stats Overview */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             <div className="bg-white p-6 rounded-lg shadow-sm">
               <div className="flex items-center">
                 <div className="bg-blue-100 p-3 rounded-full mr-4">
@@ -174,20 +199,6 @@ const AdminDashboard = () => {
                 </div>
               </div>
             </div>
-            
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <div className="flex items-center">
-                <div className="bg-yellow-100 p-3 rounded-full mr-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Revenue</p>
-                  <p className="text-2xl font-bold">${stats.revenue.toLocaleString()}</p>
-                </div>
-              </div>
-            </div>
           </div>
           
           {/* Recent Appointments */}
@@ -214,6 +225,9 @@ const AdminDashboard = () => {
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Status
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
                     </th>
                   </tr>
                 </thead>
@@ -243,6 +257,17 @@ const AdminDashboard = () => {
                         }`}>
                           {appointment.status}
                         </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <button
+                          onClick={() => confirmDelete(appointment)}
+                          className="text-red-600 hover:text-red-900"
+                          title="Delete appointment"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -327,18 +352,6 @@ const AdminDashboard = () => {
                 </select>
               </div>
               
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Link (Optional)</label>
-                <input
-                  type="text"
-                  name="link"
-                  value={notificationData.link}
-                  onChange={handleNotificationChange}
-                  className="w-full border border-gray-300 rounded-md p-2"
-                  placeholder="/appointments/123"
-                />
-              </div>
-              
               <div className="flex justify-end space-x-3 mt-6">
                 <button
                   type="button"
@@ -358,6 +371,39 @@ const AdminDashboard = () => {
           </div>
         </div>
       )}
+      
+      {/* Delete Confirmation Modal */}
+     {isDeleteModalOpen && appointmentToDelete && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+      <div className="p-6">
+        <div className="mb-4">
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Delete Appointment</h3>
+          <p className="text-gray-600">
+            Are you sure you want to delete this appointment for {appointmentToDelete.name || 'this client'} on {appointmentToDelete.date} at {appointmentToDelete.time}? This action cannot be undone.
+          </p>
+        </div>
+        
+        <div className="flex justify-end space-x-3">
+          <button
+            type="button"
+            className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
+            onClick={closeDeleteModal}
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none"
+            onClick={handleDeleteAppointment}
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 };

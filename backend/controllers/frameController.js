@@ -6,11 +6,10 @@ const Frame = require('../models/frameModel');
 const getFrames = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 9;
+    const skip = (page - 1) * limit;
     const keyword = req.query.keyword || '';
     const prioritySort = req.query.prioritySort !== 'false'; // Default to true
-    
-    const skip = (page - 1) * limit;
     
     // Build query
     const query = {};
@@ -39,17 +38,17 @@ const getFrames = async (req, res) => {
       .limit(limit);
     
     // Get total count for pagination
-    const count = await Frame.countDocuments(query);
+    const total = await Frame.countDocuments(query);
+    const pages = Math.ceil(total / limit);
     
     res.json({
       frames,
       page,
-      pages: Math.ceil(count / limit),
-      total: count,
+      pages,
+      total
     });
   } catch (error) {
-    console.error('Error in getFrames:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: error.message });
   }
 };
 

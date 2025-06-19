@@ -9,7 +9,7 @@ const AdminCreateProduct = () => {
     name: '',
     brand: '',
     price: '',
-    description: '',
+    description: 'These stylish frames offer the perfect combination of comfort and durability. Designed with premium materials and careful attention to detail, they provide all-day wearability while maintaining a fashionable look. The lightweight construction ensures they sit comfortably on your face, and the high-quality hinges guarantee long-lasting performance.',
     material: '',
     shapeType: '', // Will be mapped to shape
     image: null,
@@ -34,7 +34,7 @@ const AdminCreateProduct = () => {
       image: e.target.files[0]
     }));
   };
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -60,12 +60,6 @@ const AdminCreateProduct = () => {
     // Add the image file with field name 'images'
     if (formData.image) {
       productData.append('images', formData.image);
-    }
-    
-    // For debugging
-    console.log("Form data contents:");
-    for (const pair of productData.entries()) {
-      console.log(pair[0], pair[1]);
     }
     
     try {

@@ -33,13 +33,11 @@ const AdminChatPage = () => {
     
     // Function to handle all conversations
     const handleConversations = (conversations) => {
-      console.log("Received conversations:", conversations);
       setActiveConversations(conversations);
     };
     
     // Function to handle new message - keep for individual message updates
     const handleNewMessage = (messageData) => {
-      console.log("Admin received message:", messageData);
       // Admin logic for individual messages (optional as we're also updating via allConversations)
     };
     
@@ -183,7 +181,10 @@ const AdminChatPage = () => {
                   >
                     <div
                       className={`max-w-3/4 rounded-lg p-3 ${
-                        msg.isAdmin ? 'bg-black text-white' : 'bg-gray-100'
+                        msg.isAdmin ? 'bg-black text-white' : 
+                        msg.type === 'system' ? 'bg-blue-100 border-l-4 border-blue-500' :
+                        msg.type === 'appointment' ? 'bg-green-100 border-l-4 border-green-500' :
+                        'bg-gray-100'
                       }`}
                     >
                       <p className="text-sm">{msg.content}</p>

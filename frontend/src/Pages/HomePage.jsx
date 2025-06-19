@@ -24,9 +24,9 @@ const HomePage = () => {
     const fetchFeaturedFrames = async () => {
       try {
         setFramesLoading(true);
-        // Pass true for prioritySort to get frames sorted by priority
-        const data = await getFrames(1, 8, '', true);
-        setFeaturedFrames(data.frames);
+        const data = await getFrames(1, 4, '', true);
+        // Ensure we only take 4 frames even if API returns more
+        setFeaturedFrames(data.frames.slice(0, 4));
       } catch (error) {
         console.error('Error fetching frames:', error);
       } finally {
@@ -104,7 +104,7 @@ const HomePage = () => {
           <h2 className="text-3xl font-bold text-center mb-12">Featured Frames</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {framesLoading ? (
-              // Loading skeletons
+              // Loading skeletons - show exactly 4
               Array(4).fill().map((_, index) => (
                 <div key={index} className="bg-white rounded-lg overflow-hidden shadow-md">
                   <div className="h-64 bg-gray-200 animate-pulse"></div>
@@ -119,7 +119,8 @@ const HomePage = () => {
                 </div>
               ))
             ) : (
-              featuredFrames.map((frame) => (
+              // Only show up to 4 frames
+              featuredFrames.slice(0, 4).map((frame) => (
                 <div key={frame._id} className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition">
                   <div className="h-64 bg-gray-200 relative overflow-hidden">
                     {frame.images && frame.images.length > 0 ? (
@@ -184,7 +185,21 @@ const HomePage = () => {
               testimonials.slice(0, 3).map((testimonial) => (
                 <div key={testimonial._id} className="bg-white p-6 rounded-lg shadow-md">
                   <div className="flex items-center mb-4">
-                    <div className="w-12 h-12 bg-gray-300 rounded-full mr-4"></div>
+                    {testimonial.user.profilePicture ? (
+                      <img
+                        src={testimonial.user.profilePicture.startsWith('http') 
+                          ? testimonial.user.profilePicture 
+                          : testimonial.user.profilePicture.startsWith('/') 
+                            ? `http://localhost:5000${testimonial.user.profilePicture}`
+                            : `http://localhost:5000/${testimonial.user.profilePicture}`}
+                        alt={testimonial.user.name}
+                        className="w-12 h-12 rounded-full object-cover mr-4"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center mr-4">
+                        <span className="text-xl text-gray-600">{testimonial.user.name.charAt(0).toUpperCase()}</span>
+                      </div>
+                    )}
                     <div>
                       <h3 className="font-semibold">{testimonial.user.name}</h3>
                       <div className="flex mt-1">
