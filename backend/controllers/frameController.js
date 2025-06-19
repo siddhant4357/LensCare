@@ -1,15 +1,54 @@
-
 const Frame = require('../models/frameModel');
 
-// @desc    Fetch all frames
+// @desc    Get all frames
 // @route   GET /api/frames
 // @access  Public
 const getFrames = async (req, res) => {
   try {
-    const frames = await Frame.find({});
-    res.json(frames);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const keyword = req.query.keyword || '';
+    const prioritySort = req.query.prioritySort !== 'false'; // Default to true
+    
+    const skip = (page - 1) * limit;
+    
+    // Build query
+    const query = {};
+    if (keyword) {
+      query.$or = [
+        { name: { $regex: keyword, $options: 'i' } },
+        { brand: { $regex: keyword, $options: 'i' } },
+        { shape: { $regex: keyword, $options: 'i' } },
+      ];
+    }
+    
+    // Define sort order based on prioritySort parameter
+    let sortOrder = {};
+    if (prioritySort) {
+      // Sort by priority first (descending), then by creation date
+      sortOrder = { priority: -1, createdAt: -1 };
+    } else {
+      // Default sort by creation date
+      sortOrder = { createdAt: -1 };
+    }
+    
+    // Execute query with pagination
+    const frames = await Frame.find(query)
+      .sort(sortOrder)
+      .skip(skip)
+      .limit(limit);
+    
+    // Get total count for pagination
+    const count = await Frame.countDocuments(query);
+    
+    res.json({
+      frames,
+      page,
+      pages: Math.ceil(count / limit),
+      total: count,
+    });
   } catch (error) {
-    console.error(error);
+    console.error('Error in getFrames:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -37,7 +76,7 @@ const getFrameById = async (req, res) => {
 // @access  Private/Admin
 const createFrame = async (req, res) => {
   try {
-    const { name, brand, shape, price, description, features, stock, colors } = req.body;
+    const { name, brand, shape, price, description, features, stock, colors, priority } = req.body;
     
     // Get image paths from multer
     const images = req.files.map(file => `/uploads/${file.filename}`);
@@ -52,12 +91,13 @@ const createFrame = async (req, res) => {
       stock,
       colors: JSON.parse(colors),
       images,
+      priority: Number(priority) || 0, // Add priority with default 0
     });
 
     const createdFrame = await frame.save();
     res.status(201).json(createdFrame);
   } catch (error) {
-    console.error(error);
+    console.error('Create frame error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -146,6 +186,41 @@ const createFrameReview = async (req, res) => {
   }
 };
 
+// @desc    Update frame priority
+// @route   PUT /api/frames/:id/priority
+// @access  Private/Admin
+const updateFramePriority = async (req, res) => {
+  try {
+    const { priority } = req.body;
+    
+    // Validate priority
+    if (priority === undefined || priority === null) {
+      return res.status(400).json({ message: 'Priority is required' });
+    }
+    
+    // Convert to number and validate
+    const priorityNum = Number(priority);
+    if (isNaN(priorityNum)) {
+      return res.status(400).json({ message: 'Priority must be a valid number' });
+    }
+    
+    const frame = await Frame.findById(req.params.id);
+    
+    if (!frame) {
+      return res.status(404).json({ message: 'Frame not found' });
+    }
+    
+    // Set priority as a number
+    frame.priority = priorityNum;
+    const updatedFrame = await frame.save();
+    
+    res.json(updatedFrame);
+  } catch (error) {
+    console.error('Priority update error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 module.exports = {
   getFrames,
   getFrameById,
@@ -153,4 +228,5 @@ module.exports = {
   updateFrame,
   deleteFrame,
   createFrameReview,
+  updateFramePriority,
 };

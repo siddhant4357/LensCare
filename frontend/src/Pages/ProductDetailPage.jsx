@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getFrameById, getFrames } from '../services/frameService';
+import { isAuthenticated } from '../services/authService'; // Add this import
 import { toast } from 'react-toastify';
 import VirtualTryOn from '../components/VirtualTryOn';
 import VirtualTryOnModal from '../components/VirtualTryOnModal';
+import axios from 'axios';
+import { addToFavorites } from '../services/favoriteService';
 
 const ProductDetailPage = () => {
   const { id } = useParams();
@@ -34,7 +37,10 @@ const ProductDetailPage = () => {
           return;
         }
         
-        setProduct(data);
+        setProduct({
+          ...data,
+          reviews: data.reviews || [] // Ensure reviews is always an array
+        });
         
         // Set default selected color
         if (data.colors && data.colors.length > 0) {
@@ -58,10 +64,10 @@ const ProductDetailPage = () => {
   const fetchSimilarProducts = async (currentProduct) => {
     try {
       setRecommendationsLoading(true);
-      const allFrames = await getFrames();
-      
-      // Filter out the current product
-      const otherFrames = allFrames.filter(frame => frame._id !== currentProduct._id);
+      // Get frames with the same brand or shape
+      const data = await getFrames(1, 8, currentProduct.brand);
+      // Filter out current product and sort by similarity
+      const otherFrames = data.frames.filter(frame => frame._id !== currentProduct._id);
       
       // Score each product for similarity based on various attributes
       const scoredFrames = otherFrames.map(frame => {
@@ -108,6 +114,35 @@ const ProductDetailPage = () => {
     setTimeout(() => {
       console.log("Modal closed and resources cleaned up");
     }, 100);
+  };
+
+  // Update the handleAddToFavorites function
+  const handleAddToFavorites = async () => {
+    try {
+      // Check if user is logged in
+      if (!isAuthenticated()) {
+        toast.info('Please log in to add products to favorites');
+        navigate('/login');
+        return;
+      }
+      
+      await addToFavorites(product._id);
+      toast.success('Added to favorites');
+    } catch (error) {
+      console.error('Add to favorites error:', error);
+      if (error.response) {
+        if (error.response.status === 400) {
+          toast.info('This product is already in your favorites');
+        } else if (error.response.status === 401) {
+          toast.info('Please log in to add products to favorites');
+          navigate('/login');
+        } else {
+          toast.error(`Failed to add to favorites: ${error.response.data?.message || 'Unknown error'}`);
+        }
+      } else {
+        toast.error('Failed to add to favorites: Network error');
+      }
+    }
   };
 
   if (loading) {
@@ -194,11 +229,13 @@ const ProductDetailPage = () => {
               <div className="flex">
                 {[...Array(5)].map((_, index) => (
                   <svg key={index} className={`h-5 w-5 ${index < 4.5 ? 'text-yellow-400' : 'text-gray-300'}`} fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69L5.98 3.927c.3-.921 1.603-.921 1.902 0z"></path>
                   </svg>
                 ))}
-                <span className="text-gray-600 ml-2">({product.reviews.length} reviews)</span>
               </div>
+              <span className="text-gray-600 ml-2">
+                ({product.reviews && product.reviews.length || 0} reviews)
+              </span>
             </div>
 
             <div className="text-2xl font-bold mb-6">${product.price}</div>
@@ -237,7 +274,10 @@ const ProductDetailPage = () => {
 
             {/* Add to Favorites and Book Appointment */}
             <div className="mb-8">
-              <button className="w-full bg-black text-white py-3 rounded-md hover:bg-gray-800 mb-4">
+              <button 
+                onClick={handleAddToFavorites}
+                className="w-full bg-black text-white py-3 rounded-md hover:bg-gray-800 mb-4"
+              >
                 Add to Favorites
               </button>
               

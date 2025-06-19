@@ -26,7 +26,7 @@ app.use(cors());
 app.use(morgan('dev'));
 
 // Static files folder for uploaded images
-app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Define routes
 app.use('/api/users', require('./routes/userRoutes'));
@@ -35,6 +35,7 @@ app.use('/api/appointments', require('./routes/appointmentRoutes'));
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use('/api/feedback', require('./routes/feedbackRoutes')); // Add this line
+app.use('/api/user/favorites', require('./routes/favoriteRoutes'));
 
 // Socket.io chat functionality
 const messages = [];

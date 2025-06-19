@@ -96,4 +96,52 @@ const getUserProfile = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser, getUserProfile };
+// @desc    Update user profile
+// @route   PUT /api/auth/profile
+// @access  Private
+const updateUserProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Update user fields if provided (except email)
+    if (req.body.name) user.name = req.body.name;
+    if (req.body.phone) user.phone = req.body.phone;
+    if (req.body.address) user.address = req.body.address;
+    
+    // If password is provided, hash and update it
+    if (req.body.password) {
+      user.password = req.body.password;
+    }
+
+    // Handle profile picture upload
+    if (req.file) {
+      user.profilePicture = `/uploads/${req.file.filename}`;
+    }
+
+    const updatedUser = await user.save();
+
+    res.json({
+      _id: updatedUser._id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      phone: updatedUser.phone,
+      address: updatedUser.address,
+      role: updatedUser.role,
+      profilePicture: updatedUser.profilePicture
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+module.exports = { 
+  registerUser, 
+  loginUser, 
+  getUserProfile,
+  updateUserProfile 
+};

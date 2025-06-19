@@ -24,10 +24,9 @@ const HomePage = () => {
     const fetchFeaturedFrames = async () => {
       try {
         setFramesLoading(true);
-        const frames = await getFrames();
-        // Get 4 random frames for featured section
-        const shuffled = [...frames].sort(() => 0.5 - Math.random());
-        setFeaturedFrames(shuffled.slice(0, 4));
+        // Pass true for prioritySort to get frames sorted by priority
+        const data = await getFrames(1, 8, '', true);
+        setFeaturedFrames(data.frames);
       } catch (error) {
         console.error('Error fetching frames:', error);
       } finally {

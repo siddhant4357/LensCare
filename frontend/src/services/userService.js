@@ -1,13 +1,18 @@
 // frontend/src/services/userService.js
 import api from './api';
 
-export const getUsers = async () => {
-  const response = await api.get('/users');
+// Make sure updateUserProfile is exported correctly
+export const updateUserProfile = async (userData) => {
+  const response = await api.put('/auth/profile', userData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  });
   return response.data;
 };
 
-export const getUserById = async (id) => {
-  const response = await api.get(`/users/${id}`);
+export const getUsers = async () => {
+  const response = await api.get('/users');
   return response.data;
 };
 

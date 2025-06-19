@@ -6,7 +6,8 @@ const {
   createFrame, 
   updateFrame, 
   deleteFrame,
-  createFrameReview
+  createFrameReview,
+  updateFramePriority
 } = require('../controllers/frameController');
 const { protect, admin } = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
@@ -19,6 +20,10 @@ router.route('/:id').get(getFrameById);
 router.route('/')
   .post(protect, admin, upload.array('images', 5), createFrame);
 
+// Priority update - Make sure this is BEFORE any routes with similar patterns
+router.put('/:id/priority', protect, admin, updateFramePriority);
+
+// Then other routes
 router.route('/:id')
   .put(protect, admin, upload.array('images', 5), updateFrame)
   .delete(protect, admin, deleteFrame);

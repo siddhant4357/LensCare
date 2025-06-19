@@ -1,4 +1,3 @@
-
 const mongoose = require('mongoose');
 
 const frameSchema = mongoose.Schema(
@@ -45,13 +44,10 @@ const frameSchema = mongoose.Schema(
         required: true,
       }
     ],
-    reviews: [
-      {
-        user: { type: String, required: true },
-        rating: { type: Number, required: true },
-        comment: { type: String, required: true },
-      }
-    ],
+    priority: {
+      type: Number,
+      default: 0
+    },
   },
   {
     timestamps: true,
@@ -59,5 +55,4 @@ const frameSchema = mongoose.Schema(
 );
 
 const Frame = mongoose.model('Frame', frameSchema);
-
 module.exports = Frame;

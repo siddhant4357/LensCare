@@ -11,8 +11,12 @@ const AdminCreateProduct = () => {
     price: '',
     description: '',
     material: '',
-    shapeType: '',
-    image: null
+    shapeType: '', // Will be mapped to shape
+    image: null,
+    priority: 0,
+    // Add these missing fields
+    stock: '10', // Default value
+    features: 'High quality\nDurable\nComfortable' // Example features
   });
   const [loading, setLoading] = useState(false);
   
@@ -36,11 +40,33 @@ const AdminCreateProduct = () => {
     
     // Create FormData for file upload
     const productData = new FormData();
+    
+    // Map shapeType to shape (what the backend expects)
+    productData.append('shape', formData.shapeType);
+    
+    // Add all other text fields
     Object.keys(formData).forEach(key => {
-      if (formData[key] !== null) {
+      if (formData[key] !== null && key !== 'image' && key !== 'shapeType') {
         productData.append(key, formData[key]);
       }
     });
+    
+    // Add a default colors array
+    const defaultColors = [
+      { name: 'Black', hex: '#000000', selected: true }
+    ];
+    productData.append('colors', JSON.stringify(defaultColors));
+    
+    // Add the image file with field name 'images'
+    if (formData.image) {
+      productData.append('images', formData.image);
+    }
+    
+    // For debugging
+    console.log("Form data contents:");
+    for (const pair of productData.entries()) {
+      console.log(pair[0], pair[1]);
+    }
     
     try {
       setLoading(true);
@@ -48,7 +74,8 @@ const AdminCreateProduct = () => {
       toast.success('Product created successfully');
       navigate('/admin/products');
     } catch (error) {
-      toast.error('Failed to create product');
+      toast.error('Failed to create product: ' + (error.response?.data?.message || 'Unknown error'));
+      console.error('Error creating product:', error);
     } finally {
       setLoading(false);
     }
@@ -159,6 +186,24 @@ const AdminCreateProduct = () => {
               />
             </div>
             
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Priority (0-10)
+              </label>
+              <input
+                type="number"
+                name="priority"
+                value={formData.priority}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-md p-2"
+                min="0"
+                max="10"
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                Higher priority products appear first on the homepage and product listings
+              </p>
+            </div>
+            
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Description
@@ -170,6 +215,24 @@ const AdminCreateProduct = () => {
                 className="w-full border border-gray-300 rounded-md p-2"
                 rows="4"
                 required
+              ></textarea>
+            </div>
+            
+            {/* Add a hidden stock field */}
+            <input type="hidden" name="stock" value={formData.stock} />
+            
+            {/* Add features field */}
+            <div className="md:col-span-2 mt-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Features (one per line)
+              </label>
+              <textarea
+                name="features"
+                value={formData.features}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-md p-2"
+                rows="3"
+                placeholder="Enter features, one per line"
               ></textarea>
             </div>
           </div>

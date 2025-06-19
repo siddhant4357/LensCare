@@ -1,4 +1,3 @@
-
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
@@ -38,6 +37,10 @@ const userSchema = mongoose.Schema(
     lastLogin: {
       type: Date,
       default: Date.now,
+    },
+    profilePicture: {
+      type: String,
+      default: '',
     },
   },
   {
