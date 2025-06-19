@@ -7,7 +7,7 @@ const Chat = () => {
   const [newMessage, setNewMessage] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [socket, setSocket] = useState(null);
-  const [unreadCount, setUnreadCount] = useState(0); // Add unread counter
+  const [unreadCount, setUnreadCount] = useState(0);
   const messageEndRef = useRef(null);
   const user = getCurrentUser();
   
@@ -52,8 +52,6 @@ const Chat = () => {
     
     // Function to handle new messages
     const handleNewMessage = (message) => {
-      // console.log("Received message:", message); // Remove this line
-      
       // Special handling for system notifications
       if (message.notification && user && message.recipient === user._id) {
         // Format the notification as a chat message
@@ -92,7 +90,7 @@ const Chat = () => {
     
     // Log socket connection status
     socket.on('connect', () => {
-      // console.log('Socket connected successfully'); // Remove this line
+      // console.log('Socket connected successfully');
     });
 
     socket.on('connect_error', (error) => {
@@ -139,57 +137,87 @@ const Chat = () => {
   
   if (!isOpen) {
     return (
-      <button 
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-5 right-5 bg-black text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:bg-gray-800 relative"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-        </svg>
-        
-        {/* Notification Badge */}
-        {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-            {unreadCount > 9 ? '9+' : unreadCount}
-          </span>
-        )}
-      </button>
+      <div className="fixed bottom-8 right-8 z-50">
+        <button 
+          onClick={() => setIsOpen(true)}
+          className="group relative bg-gradient-to-br from-black via-gray-900 to-black text-white p-5 rounded-full shadow-2xl hover:shadow-3xl transition-all duration-500 transform hover:scale-110 hover:-translate-y-2"
+        >
+          {/* Animated pulse ring */}
+          <div className="absolute inset-0 rounded-full bg-white opacity-20 animate-ping"></div>
+          
+          <svg className="w-7 h-7 group-hover:scale-110 transition-transform duration-300 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          </svg>
+          
+          {/* Notification Badge with premium styling */}
+          {unreadCount > 0 && (
+            <div className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs w-6 h-6 flex items-center justify-center rounded-full shadow-lg border-2 border-white animate-bounce">
+              <span className="font-bold">{unreadCount > 9 ? '9+' : unreadCount}</span>
+            </div>
+          )}
+        </button>
+      </div>
     );
   }
   
   return (
-    <div className="fixed bottom-5 right-5 w-80 h-96 bg-white rounded-lg shadow-xl flex flex-col overflow-hidden z-50 border border-gray-200">
-      <div className="bg-black text-white p-4 flex justify-between items-center">
-        <h3 className="font-medium">LensCare Support</h3>
-        <button onClick={() => setIsOpen(false)} className="text-gray-300 hover:text-white">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-          </svg>
-        </button>
+    <div className="fixed bottom-6 right-6 w-96 h-[32rem] bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden z-50 border border-gray-100 backdrop-blur-lg">
+      {/* Header with gradient background */}
+      <div className="bg-gradient-to-r from-black via-gray-900 to-black text-white p-6 relative overflow-hidden">
+        {/* Background pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-2 right-4 transform rotate-12">
+            <svg width="20" height="10" viewBox="0 0 20 10" fill="currentColor" className="text-white">
+              <path d="M5 5a2.5 2.5 0 0 1 5 0 2.5 2.5 0 0 1 5 0M1 5h3M11 5h3M6.5 5h2"/>
+            </svg>
+          </div>
+        </div>
+        
+        <div className="flex justify-between items-center relative z-10">
+          <div>
+            <h3 className="font-black text-xl">LensCare Support</h3>
+            <p className="text-gray-300 text-sm font-light">We're here to help</p>
+          </div>
+          <button 
+            onClick={() => setIsOpen(false)} 
+            className="text-gray-300 hover:text-white hover:bg-white/10 p-2 rounded-full transition-all duration-300 transform hover:scale-110 hover:rotate-90"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+            </svg>
+          </button>
+        </div>
       </div>
       
-      <div className="flex-1 p-4 overflow-y-auto">
+      {/* Messages area with premium styling */}
+      <div className="flex-1 p-6 overflow-y-auto bg-gradient-to-b from-gray-50 to-white">
         {messages.length === 0 ? (
-          <div className="text-center text-gray-500 mt-12">
-            <p>No messages yet.</p>
-            <p className="text-sm mt-2">Start a conversation!</p>
+          <div className="text-center text-gray-500 mt-16 animate-fade-in">
+            <div className="text-6xl mb-4 animate-bounce">💬</div>
+            <p className="font-medium text-lg">No messages yet.</p>
+            <p className="text-sm mt-2 text-gray-400">Start a conversation with us!</p>
           </div>
         ) : (
           messages.map((msg, index) => (
             <div
               key={index}
-              className={`mb-3 ${msg.userId === (user?._id || 'guest') ? 'flex justify-end' : 'flex justify-start'}`}
+              className={`mb-4 animate-slide-in ${msg.userId === (user?._id || 'guest') ? 'flex justify-end' : 'flex justify-start'}`}
             >
               <div
-                className={`max-w-3/4 rounded-lg p-3 ${
-                  msg.userId === (user?._id || 'guest') ? 'bg-black text-white' : 
-                  msg.type === 'system' ? 'bg-blue-100 border-l-4 border-blue-500' :
-                  msg.type === 'appointment' ? 'bg-green-100 border-l-4 border-green-500' :
-                  'bg-gray-100'
+                className={`max-w-3/4 rounded-2xl p-4 shadow-lg transform transition-all duration-300 hover:scale-105 ${
+                  msg.userId === (user?._id || 'guest') 
+                    ? 'bg-gradient-to-br from-black via-gray-900 to-black text-white' 
+                    : msg.type === 'system' 
+                      ? 'bg-gradient-to-r from-blue-50 to-blue-100 border-l-4 border-blue-500 text-blue-900'
+                      : msg.type === 'appointment' 
+                        ? 'bg-gradient-to-r from-green-50 to-green-100 border-l-4 border-green-500 text-green-900'
+                        : 'bg-white border border-gray-200 shadow-md'
                 }`}
               >
-                <p className="text-sm">{msg.content}</p>
-                <p className="text-xs text-right mt-1 opacity-70">
+                <p className="text-sm leading-relaxed font-medium">{msg.content}</p>
+                <p className={`text-xs text-right mt-2 font-light ${
+                  msg.userId === (user?._id || 'guest') ? 'text-gray-300' : 'text-gray-500'
+                }`}>
                   {new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                 </p>
               </div>
@@ -199,20 +227,21 @@ const Chat = () => {
         <div ref={messageEndRef} />
       </div>
       
-      <form onSubmit={sendMessage} className="p-2 border-t border-gray-200">
-        <div className="flex items-center">
+      {/* Input area with premium styling */}
+      <form onSubmit={sendMessage} className="p-6 bg-white border-t border-gray-100">
+        <div className="flex items-center space-x-3">
           <input
             type="text"
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            placeholder="Type a message..."
-            className="flex-1 p-2 border border-gray-300 rounded-l focus:outline-none focus:ring-1 focus:ring-black"
+            placeholder="Type your message..."
+            className="flex-1 p-4 border-2 border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-300 placeholder-gray-400 font-medium"
           />
           <button
             type="submit"
-            className="bg-black text-white p-2 rounded-r hover:bg-gray-800"
+            className="bg-gradient-to-r from-black via-gray-900 to-black text-white p-4 rounded-2xl hover:shadow-lg transition-all duration-300 transform hover:scale-110 hover:-translate-y-1 group"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 group-hover:scale-110 transition-transform duration-300" viewBox="0 0 20 20" fill="currentColor">
               <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
             </svg>
           </button>
