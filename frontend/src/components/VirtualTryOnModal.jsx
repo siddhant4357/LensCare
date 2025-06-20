@@ -1,55 +1,51 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import VirtualTryOn from './VirtualTryOn';
 
 const VirtualTryOnModal = ({ frame, onClose }) => {
-  const [isReady, setIsReady] = useState(false);
-  
-  useEffect(() => {
-    // Set modal as ready after a brief delay to ensure smooth animation
-    const timer = setTimeout(() => {
-      setIsReady(true);
-    }, 100);
-    
-    return () => {
-      clearTimeout(timer);
-    };
-  }, []);
-
-  // Enhanced close handler with delay to ensure cleanup completes
-  const handleClose = () => {
-    setIsReady(false);
-    
-    // Short delay to ensure cleanup completes before unmounting
-    setTimeout(() => {
-      onClose();
-    }, 100);
-  };
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg max-w-4xl w-full overflow-hidden relative">
-        <div className="p-4 bg-black text-white flex justify-between items-center">
-          <h3 className="font-medium">Virtual Try-On: {frame.name}</h3>
-          <button 
-            onClick={handleClose}
-            className="text-white hover:text-gray-300"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-        
-        <div className="p-6">
-          <VirtualTryOn frame={frame} onClose={handleClose} />
+    <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-2 sm:p-4 backdrop-blur-sm">
+      <div className="bg-white rounded-3xl w-full max-w-4xl max-h-[95vh] overflow-auto animate-fade-in-up shadow-2xl">
+        <div className="flex flex-col md:flex-row">
+          {/* Try-on Area - Made larger */}
+          <div className="md:w-4/5 p-4 md:p-6">
+            <div className="flex justify-between items-center mb-3">
+              <h2 className="text-xl font-bold">Virtual Try-On</h2>
+              <button 
+                onClick={onClose}
+                className="text-gray-500 hover:text-gray-800 hover:bg-gray-100 p-2 rounded-full transition-all duration-300"
+                aria-label="Close"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <VirtualTryOn frame={frame} />
+          </div>
           
-          <div className="mt-6">
-            <h4 className="font-medium mb-2">How it works:</h4>
-            <ol className="list-decimal list-inside text-sm text-gray-600 space-y-1">
-              <li>Click "Start Virtual Try-On" to activate your camera</li>
-              <li>Position your face in the center of the frame</li>
-              <li>Click "Capture Photo" to take a picture</li>
-              <li>Our AI will automatically fit the frame to your face</li>
+          {/* Instructions Panel - Made smaller and hidden on small screens */}
+          <div className="hidden md:block bg-gradient-to-br from-gray-50 to-white md:w-1/5 p-4 md:p-6 border-t md:border-t-0 md:border-l border-gray-100">
+            <h3 className="font-bold text-lg mb-3">How It Works</h3>
+            
+            <div className="border-l-4 border-black pl-3 py-2 mb-3">
+              <p className="text-gray-800 font-medium text-sm">
+                Try <span className="font-bold">{frame.name}</span> frames
+              </p>
+            </div>
+            
+            <ol className="space-y-3 text-gray-600 text-sm">
+              <li className="flex items-start">
+                <span className="bg-black text-white h-5 w-5 rounded-full flex items-center justify-center mr-2 mt-0.5 flex-shrink-0 text-xs">1</span>
+                <span>Start Try-On</span>
+              </li>
+              <li className="flex items-start">
+                <span className="bg-black text-white h-5 w-5 rounded-full flex items-center justify-center mr-2 mt-0.5 flex-shrink-0 text-xs">2</span>
+                <span>Adjust size/opacity</span>
+              </li>
+              <li className="flex items-start">
+                <span className="bg-black text-white h-5 w-5 rounded-full flex items-center justify-center mr-2 mt-0.5 flex-shrink-0 text-xs">3</span>
+                <span>Drag to position</span>
+              </li>
             </ol>
           </div>
         </div>

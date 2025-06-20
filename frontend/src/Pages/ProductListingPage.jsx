@@ -5,16 +5,15 @@ import { toast } from 'react-toastify';
 import LazyImage from '../components/LazyImage';
 
 const ProductListingPage = () => {
-  // Keep your existing state variables
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   
+  // Updated to store arrays of selected values
   const [filters, setFilters] = useState({
-    shape: '',
-    priceRange: '',
-    // Remove the brand property
+    shapes: [],
+    priceRanges: [],
   });
   
   // Pagination states
@@ -34,18 +33,14 @@ const ProductListingPage = () => {
     { label: 'Over $250', value: '250-1000' }
   ];
   
-  // Fetch products from API - modified to replace products instead of appending
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        // This will fetch products for the current page
         const data = await getFrames(page, 9, '', sortBy === 'priority');
         
-        // Process your data
         let sortedFrames = [...data.frames];
         
-        // Your existing sorting logic
         if (sortBy === 'price-asc') {
           sortedFrames.sort((a, b) => a.price - b.price);
         } else if (sortBy === 'price-desc') {
@@ -64,56 +59,67 @@ const ProductListingPage = () => {
     };
     
     fetchProducts();
-  }, [page, sortBy]); // Make sure page is in the dependency array
+  }, [page, sortBy]);
   
-  // Apply filters when they change
+  // Updated filtering logic to handle arrays of selected values
   useEffect(() => {
     let result = products;
     
-    if (filters.shape) {
-      result = result.filter(product => product.shape === filters.shape);
+    if (filters.shapes.length > 0) {
+      result = result.filter(product => filters.shapes.includes(product.shape));
     }
     
-    if (filters.priceRange) {
-      const [min, max] = filters.priceRange.split('-').map(Number);
-      result = result.filter(product => product.price >= min && product.price <= max);
+    if (filters.priceRanges.length > 0) {
+      result = result.filter(product => {
+        return filters.priceRanges.some(range => {
+          const [min, max] = range.split('-').map(Number);
+          return product.price >= min && product.price <= max;
+        });
+      });
     }
     
     setFilteredProducts(result);
   }, [filters, products]);
   
-  // Handle filter changes
+  // Updated to handle checkbox changes
   const handleFilterChange = (filterType, value) => {
-    setFilters(prev => ({
-      ...prev,
-      [filterType]: prev[filterType] === value ? '' : value // Toggle filter
-    }));
-  };
-  
-  // Clear all filters
-  const clearFilters = () => {
-    setFilters({
-      shape: '',
-      priceRange: ''
-      // Remove brand
+    setFilters(prev => {
+      const currentValues = [...prev[filterType]];
+      
+      if (currentValues.includes(value)) {
+        // Remove value if already selected
+        return {
+          ...prev,
+          [filterType]: currentValues.filter(item => item !== value)
+        };
+      } else {
+        // Add value if not selected
+        return {
+          ...prev,
+          [filterType]: [...currentValues, value]
+        };
+      }
     });
   };
   
-  // Add a function to handle page changes
+  const clearFilters = () => {
+    setFilters({
+      shapes: [],
+      priceRanges: []
+    });
+  };
+  
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= pages) {
       setPage(newPage);
-      // Scroll back to the top of the product list
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
-  // Render pagination UI
   const renderPagination = () => {
     const pageNumbers = [];
     const maxVisiblePages = 5;
     
-    // Calculate which page numbers to show
     let startPage = Math.max(1, page - Math.floor(maxVisiblePages / 2));
     let endPage = Math.min(pages, startPage + maxVisiblePages - 1);
     
@@ -126,16 +132,16 @@ const ProductListingPage = () => {
     }
     
     return (
-      <div className="flex justify-center mt-8">
-        <nav className="inline-flex rounded-md shadow">
+      <div className="flex justify-center mt-12">
+        <nav className="inline-flex rounded-2xl shadow-lg overflow-hidden">
           <button 
             onClick={() => !loading && handlePageChange(page - 1)}
             disabled={page === 1 || loading}
-            className={`px-3 py-1 rounded-l-md border border-gray-300 ${
+            className={`px-5 py-3 ${
               page === 1 || loading
                 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
                 : 'bg-white text-gray-700 hover:bg-gray-50'
-            }`}
+            } font-medium transition-all duration-300`}
           >
             Previous
           </button>
@@ -144,12 +150,12 @@ const ProductListingPage = () => {
             <>
               <button 
                 onClick={() => handlePageChange(1)}
-                className="px-3 py-1 border-t border-b border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                className="px-5 py-3 bg-white text-gray-700 hover:bg-gray-50 font-medium transition-all duration-300"
               >
                 1
               </button>
               {startPage > 2 && (
-                <span className="px-3 py-1 border-t border-b border-gray-300 bg-white text-gray-700">
+                <span className="px-3 py-3 bg-white text-gray-700 flex items-center">
                   ...
                 </span>
               )}
@@ -160,11 +166,11 @@ const ProductListingPage = () => {
             <button
               key={num}
               onClick={() => handlePageChange(num)}
-              className={`px-3 py-1 border-t border-b border-gray-300 ${
+              className={`px-5 py-3 ${
                 num === page 
                   ? 'bg-black text-white' 
                   : 'bg-white text-gray-700 hover:bg-gray-50'
-              }`}
+              } font-medium transition-all duration-300`}
             >
               {num}
             </button>
@@ -173,13 +179,13 @@ const ProductListingPage = () => {
           {endPage < pages && (
             <>
               {endPage < pages - 1 && (
-                <span className="px-3 py-1 border-t border-b border-gray-300 bg-white text-gray-700">
+                <span className="px-3 py-3 bg-white text-gray-700 flex items-center">
                   ...
                 </span>
               )}
               <button 
                 onClick={() => handlePageChange(pages)}
-                className="px-3 py-1 border-t border-b border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                className="px-5 py-3 bg-white text-gray-700 hover:bg-gray-50 font-medium transition-all duration-300"
               >
                 {pages}
               </button>
@@ -189,11 +195,11 @@ const ProductListingPage = () => {
           <button 
             onClick={() => !loading && handlePageChange(page + 1)}
             disabled={page === pages || loading}
-            className={`px-3 py-1 rounded-r-md border border-gray-300 ${
+            className={`px-5 py-3 ${
               page === pages || loading
                 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
                 : 'bg-white text-gray-700 hover:bg-gray-50'
-            }`}
+            } font-medium transition-all duration-300`}
           >
             Next
           </button>
@@ -202,80 +208,48 @@ const ProductListingPage = () => {
     );
   };
 
-  // Replace the loading check with a more localized approach
   return (
-    <div className="bg-white">
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8 text-center">Eyewear Collection</h1>
-        
-        {/* Mobile filter dialog and filters sidebar remain unchanged */}
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Filters sidebar - keep as is */}
-          <div className={`w-full lg:w-1/4 lg:block ${mobileFiltersOpen ? 'block' : 'hidden'}`}>
-            <div className="bg-gray-50 p-5 rounded-lg shadow-sm">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-lg font-semibold">Filters</h2>
-                <button 
-                  onClick={clearFilters}
-                  className="text-sm text-gray-500 hover:text-black"
-                >
-                  Clear all
-                </button>
-              </div>
-              
-              {/* Shape Filter */}
-              <div className="mb-8">
-                <h3 className="text-md font-medium mb-3">Shape</h3>
-                <div className="space-y-2">
-                  {shapes.map(shape => (
-                    <div key={shape} className="flex items-center">
-                      <input
-                        id={`shape-${shape}`}
-                        name="shape"
-                        type="checkbox"
-                        className="h-4 w-4 border-gray-300 rounded text-black focus:ring-black"
-                        checked={filters.shape === shape}
-                        onChange={() => handleFilterChange('shape', shape)}
-                      />
-                      <label htmlFor={`shape-${shape}`} className="ml-3 text-sm text-gray-600">
-                        {shape}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              
-              {/* Price Filter */}
+    <div className="min-h-screen bg-white relative overflow-x-hidden">
+      {/* Background Glasses Pattern */}
+      <div className="fixed inset-0 pointer-events-none opacity-5 z-0">
+        <div className="absolute top-20 left-10 transform rotate-12">
+          <svg width="80" height="40" viewBox="0 0 80 40" fill="currentColor" className="text-gray-900">
+            <path d="M20 20a15 15 0 0 1 30 0 15 15 0 0 1 30 0M5 20h10M65 20h10M35 20h10"/>
+          </svg>
+        </div>
+        <div className="absolute top-1/3 right-20 transform -rotate-45">
+          <svg width="60" height="30" viewBox="0 0 60 30" fill="currentColor" className="text-gray-900">
+            <path d="M15 15a10 10 0 0 1 20 0 10 10 0 0 1 20 0M5 15h10M45 15h10M25 15h10"/>
+          </svg>
+        </div>
+        <div className="absolute bottom-1/3 left-1/4 transform rotate-45">
+          <svg width="70" height="35" viewBox="0 0 70 35" fill="currentColor" className="text-gray-900">
+            <path d="M17.5 17.5a12.5 12.5 0 0 1 25 0 12.5 12.5 0 0 1 25 0M5 17.5h12.5M52.5 17.5h12.5M30 17.5h10"/>
+          </svg>
+        </div>
+      </div>
+
+     
+      
+      {/* Filters and Products Section */}
+      <section className="py-16 bg-gradient-to-b from-gray-50 to-white overflow-hidden">
+        <div className="container mx-auto px-6">
+          <div className="max-w-7xl mx-auto">
+            {/* Stats Bar */}
+            <div className="flex justify-between items-center mb-10 animate-fade-in-up">
               <div>
-                <h3 className="text-md font-medium mb-3">Price</h3>
-                <div className="space-y-2">
-                  {priceRanges.map(range => (
-                    <div key={range.value} className="flex items-center">
-                      <input
-                        id={`price-${range.value}`}
-                        name="price"
-                        type="checkbox"
-                        className="h-4 w-4 border-gray-300 rounded text-black focus:ring-black"
-                        checked={filters.priceRange === range.value}
-                        onChange={() => handleFilterChange('priceRange', range.value)}
-                      />
-                      <label htmlFor={`price-${range.value}`} className="ml-3 text-sm text-gray-600">
-                        {range.label}
-                      </label>
-                    </div>
-                  ))}
-                </div>
+                <p className="text-gray-500">
+                  Showing <span className="font-medium text-black">{filteredProducts.length}</span> products 
+                  {totalProducts > 0 && <> out of <span className="font-medium text-black">{totalProducts}</span></>}
+                </p>
               </div>
-              
-              {/* Add a sorting dropdown in the filter section */}
-              <div className="mb-8">
-                <h3 className="text-md font-medium mb-3">Sort By</h3>
+              <div className="flex items-center space-x-3">
+                <span className="text-gray-500">Sort by:</span>
                 <select
-                  className="w-full border border-gray-300 rounded-md p-2"
+                  className="border-0 focus:ring-0 py-1 pl-2 pr-8 text-black font-medium rounded-lg bg-transparent"
                   value={sortBy}
                   onChange={(e) => {
                     setSortBy(e.target.value);
-                    // Reset page to 1 when changing sort order
                     setPage(1);
                     setProducts([]);
                     setFilteredProducts([]);
@@ -284,86 +258,233 @@ const ProductListingPage = () => {
                   <option value="priority">Featured</option>
                   <option value="price-asc">Price: Low to High</option>
                   <option value="price-desc">Price: High to Low</option>
-                  <option value="newest">Newest First</option>
                 </select>
               </div>
             </div>
-          </div>
             
-          {/* Product grid */}
-          <div className="w-full lg:w-3/4">
-            {filteredProducts.length === 0 && !loading ? (
-              <div className="text-center py-12">
-                <p className="text-lg text-gray-500">No products match your filters.</p>
-                <button 
-                  onClick={clearFilters}
-                  className="mt-4 text-black underline hover:no-underline"
-                >
-                  Clear filters
-                </button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {loading ? (
-                  // Show loading skeletons when loading
-                  Array(9).fill().map((_, index) => (
-                    <div key={index} className="bg-white rounded-lg overflow-hidden shadow-md">
-                      <div className="h-64 bg-gray-200 animate-pulse"></div>
-                      <div className="p-5">
-                        <div className="h-5 bg-gray-200 rounded animate-pulse mb-2"></div>
-                        <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4 mb-4"></div>
-                        <div className="flex justify-between items-center">
-                          <div className="h-6 bg-gray-200 rounded animate-pulse w-1/4"></div>
-                          <div className="h-4 bg-gray-200 rounded animate-pulse w-1/4"></div>
+            {/* Mobile filter button */}
+            <div className="lg:hidden mb-6 animate-fade-in-up">
+              <button
+                onClick={() => setMobileFiltersOpen(!mobileFiltersOpen)}
+                className="w-full flex items-center justify-center px-6 py-3 border border-gray-300 rounded-full shadow-sm text-black bg-white hover:bg-gray-50"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 010 2H4a1 1 0 01-1-1zm3 6a1 1 0 011-1h10a1 1 0 010 2H7a1 1 0 01-1-1zm0 6a1 1 0 011-1h10a1 1 0 010 2H7a1 1 0 01-1-1z" />
+                </svg>
+                {mobileFiltersOpen ? 'Hide Filters' : 'Show Filters'}
+              </button>
+            </div>
+
+            <div className="flex flex-col lg:flex-row gap-10">
+              {/* Filters sidebar */}
+              <div className={`lg:w-1/4 lg:block animate-fade-in-up ${mobileFiltersOpen ? 'block' : 'hidden'}`}>
+                <div className="bg-gradient-to-br from-gray-50 to-white rounded-3xl shadow-lg overflow-hidden transform hover:shadow-xl transition-all duration-500 p-8">
+                  <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-bold">Filters</h2>
+                    <button 
+                      onClick={clearFilters}
+                      className={`text-sm ${filters.shapes.length > 0 || filters.priceRanges.length > 0 ? 'text-black font-medium' : 'text-gray-400'} transition-colors duration-300`}
+                      disabled={filters.shapes.length === 0 && filters.priceRanges.length === 0}
+                    >
+                      Clear all
+                    </button>
+                  </div>
+                  
+                  {/* Shape Filter - UPDATED WITH CHECKBOXES */}
+                  <div className="mb-8">
+                    <h3 className="text-lg font-medium mb-4">Shape</h3>
+                    <div className="space-y-2">
+                      {shapes.map(shape => (
+                        <div key={shape} className="flex items-center">
+                          <label className="flex items-center w-full py-1.5 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={filters.shapes.includes(shape)}
+                              onChange={() => handleFilterChange('shapes', shape)}
+                              className="w-4 h-4 text-black rounded-sm focus:ring-black focus:ring-1"
+                            />
+                            <span className="ml-3 text-gray-700">{shape}</span>
+                            {filters.shapes.includes(shape) && (
+                              <span className="ml-auto text-xs text-gray-500">
+                                ({products.filter(p => p.shape === shape).length})
+                              </span>
+                            )}
+                          </label>
                         </div>
-                      </div>
+                      ))}
                     </div>
-                  ))
-                ) : (
-                  // Show actual products when loaded
-                  filteredProducts.map(product => (
-                    <div key={product._id} className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition duration-300">
-                      <div className="h-64 bg-gray-200 relative overflow-hidden">
-                        {/* FIX: Display actual product image instead of placeholder */}
-                        {product.images && product.images.length > 0 ? (
-                          <LazyImage 
-                            src={`http://localhost:5000${product.images[0]}`} 
-                            alt={product.name} 
-                            className="h-64"
-                          />
-                        ) : (
-                          <div className="h-64 flex items-center justify-center text-gray-400">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                            </svg>
+                  </div>
+                  
+                  {/* Price Filter - UPDATED WITH CHECKBOXES */}
+                  <div className="mb-8">
+                    <h3 className="text-lg font-medium mb-4">Price</h3>
+                    <div className="space-y-2">
+                      {priceRanges.map(range => (
+                        <div key={range.value} className="flex items-center">
+                          <label className="flex items-center w-full py-1.5 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={filters.priceRanges.includes(range.value)}
+                              onChange={() => handleFilterChange('priceRanges', range.value)}
+                              className="w-4 h-4 text-black rounded-sm focus:ring-black focus:ring-1"
+                            />
+                            <span className="ml-3 text-gray-700">{range.label}</span>
+                            {filters.priceRanges.includes(range.value) && (
+                              <span className="ml-auto text-xs text-gray-500">
+                                {(() => {
+                                  const [min, max] = range.value.split('-').map(Number);
+                                  return `(${products.filter(p => p.price >= min && p.price <= max).length})`;
+                                })()}
+                              </span>
+                            )}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Active Filters Summary */}
+                  {(filters.shapes.length > 0 || filters.priceRanges.length > 0) && (
+                    <div className="border-t border-gray-200 pt-6">
+                      <h3 className="text-sm font-medium mb-3">Active Filters</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {filters.shapes.map(shape => (
+                          <div 
+                            key={shape} 
+                            className="inline-flex items-center bg-gray-100 rounded-full pl-3 pr-1 py-1 text-sm"
+                          >
+                            {shape}
+                            <button 
+                              onClick={() => handleFilterChange('shapes', shape)}
+                              className="ml-1 h-5 w-5 rounded-full inline-flex items-center justify-center text-gray-600 hover:bg-gray-200"
+                            >
+                              <span className="sr-only">Remove</span>
+                              <svg className="h-3 w-3" fill="none" viewBox="0 0 12 12" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8l4-4m0 0L4 4m4 0l-4 4" />
+                              </svg>
+                            </button>
                           </div>
-                        )}
-                      </div>
-                      <div className="p-5">
-                        <div className="flex justify-between items-start mb-2">
-                          <h3 className="font-semibold text-lg">{product.name}</h3>
-                          <span className="bg-black text-white px-2 py-1 text-xs rounded">{product.shape}</span>
-                        </div>
-                        <p className="text-gray-600 text-sm mb-3">{product.brand}</p>
-                        <div className="flex justify-between items-center">
-                          <span className="font-bold">${product.price}</span>
-                          <Link to={`/products/${product._id}`} className="text-black hover:underline">
-                            View Details →
-                          </Link>
-                        </div>
+                        ))}
+                        
+                        {filters.priceRanges.map(range => (
+                          <div 
+                            key={range} 
+                            className="inline-flex items-center bg-gray-100 rounded-full pl-3 pr-1 py-1 text-sm"
+                          >
+                            {priceRanges.find(r => r.value === range)?.label || range}
+                            <button 
+                              onClick={() => handleFilterChange('priceRanges', range)}
+                              className="ml-1 h-5 w-5 rounded-full inline-flex items-center justify-center text-gray-600 hover:bg-gray-200"
+                            >
+                              <span className="sr-only">Remove</span>
+                              <svg className="h-3 w-3" fill="none" viewBox="0 0 12 12" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8l4-4m0 0L4 4m4 0l-4 4" />
+                              </svg>
+                            </button>
+                          </div>
+                        ))}
                       </div>
                     </div>
-                  ))
+                  )}
+                </div>
+              </div>
+              
+              {/* Product grid */}
+              <div className="w-full lg:w-3/4">
+                {filteredProducts.length === 0 && !loading ? (
+                  <div className="bg-gradient-to-br from-gray-50 to-white rounded-3xl shadow-lg p-16 text-center">
+                    <div className="text-6xl mb-4">🔍</div>
+                    <h3 className="text-2xl font-bold mb-2">No Products Found</h3>
+                    <p className="text-gray-600 mb-6">We couldn't find any products matching your filters.</p>
+                    <button 
+                      onClick={clearFilters}
+                      className="px-8 py-3 bg-black text-white rounded-full font-medium hover:bg-gray-800 transition-all duration-300 transform hover:scale-105"
+                    >
+                      Clear All Filters
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                      {loading ? (
+                        // Skeleton loaders
+                        Array(9).fill().map((_, index) => (
+                          <div key={index} className="group bg-gradient-to-br from-gray-50 to-white rounded-3xl overflow-hidden shadow-lg transform hover:shadow-xl transition-all duration-500 animate-pulse">
+                            <div className="h-64 bg-gray-200"></div>
+                            <div className="p-6">
+                              <div className="h-6 bg-gray-200 rounded mb-3"></div>
+                              <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
+                              <div className="flex justify-between items-center">
+                                <div className="h-6 bg-gray-200 rounded w-1/4"></div>
+                                <div className="h-10 w-20 bg-gray-200 rounded-full"></div>
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        // Actual products
+                        filteredProducts.map(product => (
+                          <div key={product._id} className="group bg-gradient-to-br from-gray-50 to-white rounded-3xl overflow-hidden shadow-lg transform hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2 animate-fade-in-up">
+                            <div className="h-64 bg-gray-100 relative overflow-hidden">
+                              {product.images && product.images.length > 0 ? (
+                                <LazyImage 
+                                  src={`http://localhost:5000${product.images[0]}`} 
+                                  alt={product.name} 
+                                  className="h-full w-full object-cover object-center group-hover:scale-110 transition-transform duration-700"
+                                />
+                              ) : (
+                                <div className="flex items-center justify-center h-full">
+                                  <div className="text-6xl text-gray-300">👓</div>
+                                </div>
+                              )}
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                              <div className="absolute top-4 right-4">
+                                <span className="bg-black/80 text-white text-xs px-3 py-1 rounded-full font-medium">
+                                  {product.shape}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="p-6">
+                              <h3 className="font-bold text-xl mb-1 group-hover:text-black transition-colors duration-300">{product.name}</h3>
+                              <p className="text-gray-500 mb-4 font-medium">{product.brand}</p>
+                              <div className="flex justify-between items-center">
+                                <span className="font-black text-2xl">${product.price.toFixed(2)}</span>
+                                <Link 
+                                  to={`/products/${product._id}`} 
+                                  className="bg-black text-white px-5 py-2 rounded-full font-medium hover:bg-gray-800 transition-all duration-300 transform group-hover:scale-105"
+                                >
+                                  View
+                                </Link>
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                    
+                    {/* Pagination */}
+                    {!loading && pages > 1 && renderPagination()}
+                  </>
                 )}
               </div>
-            )}
-            
-            {/* Keep pagination but modify to show disabled state when loading */}
-            {!loading && pages > 1 && renderPagination()}
+            </div>
           </div>
         </div>
-      </div>
+      </section>
+      
+      {/* CTA Section */}
+      <section className="py-16 bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white relative">
+        <div className="absolute inset-0 bg-black/30"></div>
+        <div className="container mx-auto px-6 text-center relative z-10 max-w-4xl">
+          <h2 className="text-4xl md:text-5xl font-bold mb-4">Can't Find What You're Looking For?</h2>
+          <p className="text-lg text-gray-300 mb-8 max-w-2xl mx-auto">
+            Schedule an appointment with our experts who can help you find the perfect frames
+          </p>
+          <Link to="/book-appointment" className="px-10 py-4 bg-white text-black rounded-full font-bold text-lg hover:scale-105 transition-all duration-300 inline-block">
+            Book Appointment
+          </Link>
+        </div>
+      </section>
     </div>
   );
 };

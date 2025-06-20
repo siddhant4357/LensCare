@@ -279,19 +279,19 @@ const HomePage = () => {
         </div>
       </section>
       
-      {/* CTA Section */}
-      <section className="relative py-24 bg-gradient-to-r from-black via-gray-900 to-black text-white">
-        <div className="absolute inset-0 bg-black/50"></div>
-        <div className="container mx-auto px-6 text-center relative z-10">
-          <h2 className="text-5xl md:text-6xl font-black mb-8">Ready to See Clearly?</h2>
-          <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-4xl mx-auto font-light leading-relaxed">
+      {/* CTA Section - Simplified */}
+      <section className="py-16 bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white relative">
+        <div className="absolute inset-0 bg-black/30"></div>
+        <div className="container mx-auto px-6 text-center relative z-10 max-w-4xl">
+          <h2 className="text-4xl md:text-5xl font-bold mb-4">Ready to See Clearly?</h2>
+          <p className="text-lg text-gray-300 mb-8 max-w-2xl mx-auto">
             Join thousands of satisfied customers who trust us with their vision
           </p>
-          <div className="flex flex-col sm:flex-row gap-6 justify-center">
-            <Link to="/book-appointment" className="group relative px-12 py-4 bg-white text-black rounded-full font-bold text-lg transition-all duration-500 hover:scale-110 transform hover:-translate-y-1">
-              <span className="relative z-10">Book Appointment</span>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link to="/book-appointment" className="px-8 py-3 bg-white text-black rounded-full font-bold hover:scale-105 transition-all duration-300">
+              Book Appointment
             </Link>
-            <Link to="/products" className="group relative px-12 py-4 border-2 border-white text-white rounded-full font-bold text-lg transition-all duration-500 hover:bg-white hover:text-black hover:scale-110 transform hover:-translate-y-1">
+            <Link to="/products" className="px-8 py-3 border-2 border-white text-white rounded-full font-bold hover:bg-white hover:text-black transition-all duration-300">
               Browse Collection
             </Link>
           </div>
