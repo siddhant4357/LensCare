@@ -11,7 +11,6 @@ import ProductDetailPage from './Pages/ProductDetailPage';
 import BookAppointmentPage from './Pages/BookAppointmentPage';
 import ContactUsPage from './Pages/ContactUsPage';
 import AdminDashboard from './Pages/Admin/Dashboard';
-import AdminUploadFrame from './Pages/Admin/UploadFrame';
 import AdminManageAppointments from './Pages/Admin/ManageAppointments';
 import AdminManageUsers from './Pages/Admin/ManageUsers';
 import LoginPage from './Pages/LoginPage';
@@ -61,7 +60,6 @@ const App = () => {
             </AdminRoute>
           }>
             <Route index element={<AdminDashboard />} />
-            <Route path="upload-frame" element={<AdminUploadFrame />} />
             <Route path="appointments" element={<AdminManageAppointments />} />
             <Route path="users" element={<AdminManageUsers />} />
             <Route path="chat" element={<AdminChatPage />} />
