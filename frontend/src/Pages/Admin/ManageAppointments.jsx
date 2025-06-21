@@ -16,6 +16,7 @@ const AdminManageAppointments = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [appointmentToDelete, setAppointmentToDelete] = useState(null);
+  const [items, setItems] = useState([]);
 
   useEffect(() => {
     const fetchAppointments = async () => {
@@ -259,7 +260,7 @@ const AdminManageAppointments = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredAppointments.map((appointment) => (
+                {Array.isArray(filteredAppointments) && filteredAppointments.slice(0, 10).map((appointment) => (
                   <tr key={appointment._id} className="hover:bg-gray-50 transition-colors duration-200">
                     <td className="px-6 py-4">
                       <div className="flex items-center">
