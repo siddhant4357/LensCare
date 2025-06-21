@@ -1,9 +1,43 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import Chat from '../components/Chat'; // Add this import at the top
+import Chat from '../components/Chat'; 
 import { getFrames } from '../services/frameService';
 import { getImageUrl } from '../utils/imageUrl';
+
+// Static testimonials to show when no database testimonials exist
+const staticTestimonials = [
+  {
+    _id: 'static-1',
+    user: {
+      name: 'Sarah Johnson',
+      profilePicture: null
+    },
+    rating: 5,
+    comment: "The service at LensCare is outstanding! I found the perfect frames that match my style perfectly. The staff was incredibly helpful and knowledgeable.",
+    createdAt: new Date('2023-09-15').toISOString()
+  },
+  {
+    _id: 'static-2',
+    user: {
+      name: 'Michael Chen',
+      profilePicture: null
+    },
+    rating: 5,
+    comment: "I've been wearing glasses for 20 years, and these are by far the most comfortable frames I've ever owned. The quality is exceptional!",
+    createdAt: new Date('2023-10-02').toISOString()
+  },
+  {
+    _id: 'static-3',
+    user: {
+      name: 'Emma Rodriguez',
+      profilePicture: null
+    },
+    rating: 4,
+    comment: "My eye exam was thorough and the doctor took time to explain everything. I appreciated the attention to detail in finding the right prescription.",
+    createdAt: new Date('2023-08-28').toISOString()
+  }
+];
 
 const HomePage = () => {
   const [testimonials, setTestimonials] = useState([]);
@@ -15,9 +49,13 @@ const HomePage = () => {
     const fetchTestimonials = async () => {
       try {
         const { data } = await axios.get('/api/feedback');
-        setTestimonials(data);
+        // If we have testimonials from the API, use them
+        // Otherwise, use our static testimonials
+        setTestimonials(data && data.length > 0 ? data : staticTestimonials);
       } catch (error) {
         console.error('Error fetching testimonials:', error);
+        // On error, fallback to static testimonials
+        setTestimonials(staticTestimonials);
       } finally {
         setLoading(false);
       }
