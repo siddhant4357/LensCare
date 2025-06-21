@@ -4,7 +4,6 @@ import axios from 'axios';
 import Chat from '../components/Chat'; // Add this import at the top
 import { getFrames } from '../services/frameService';
 import { getImageUrl } from '../utils/imageUrl';
-import { getApprovedFeedback } from '../services/feedbackService';
 
 const HomePage = () => {
   const [testimonials, setTestimonials] = useState([]);
@@ -15,7 +14,7 @@ const HomePage = () => {
   useEffect(() => {
     const fetchTestimonials = async () => {
       try {
-        const data = await getApprovedFeedback();
+        const { data } = await axios.get('/api/feedback');
         setTestimonials(data);
       } catch (error) {
         console.error('Error fetching testimonials:', error);
