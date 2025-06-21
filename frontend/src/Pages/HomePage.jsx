@@ -228,7 +228,7 @@ const HomePage = () => {
                   </div>
                 </div>
               ))
-            ) : testimonials.length > 0 ? (
+            ) : (Array.isArray(testimonials) && testimonials.length > 0) ? (
               testimonials.slice(0, 3).map((testimonial) => (
                 <div key={testimonial._id} className="group bg-gray-50 p-8 rounded-3xl hover:bg-black hover:text-white transition-all duration-500 transform hover:scale-105">
                   <div className="flex items-center mb-6">

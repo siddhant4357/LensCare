@@ -58,7 +58,8 @@ const ProductDetailPage = () => {
     try {
       setRecommendationsLoading(true);
       const data = await getFrames(1, 8, currentProduct.brand);
-      const otherFrames = data.frames.filter(frame => frame._id !== currentProduct._id);
+      const frames = Array.isArray(data.frames) ? data.frames : [];
+      const otherFrames = frames.filter(frame => frame._id !== currentProduct._id);
       
       const scoredFrames = otherFrames.map(frame => {
         let score = 0;
@@ -368,7 +369,7 @@ const ProductDetailPage = () => {
                   </div>
                 </div>
               ))
-            ) : similarProducts.length > 0 ? (
+            ) : (Array.isArray(similarProducts) && similarProducts.length > 0) ? (
               similarProducts.map((frame) => (
                 <div key={frame._id} className="group bg-gradient-to-br from-gray-50 to-white rounded-3xl overflow-hidden shadow-lg transform hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
                   <div className="h-64 bg-gray-100 relative overflow-hidden">

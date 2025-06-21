@@ -422,8 +422,7 @@ const ProductListingPage = () => {
                             </div>
                           </div>
                         ))
-                      ) : (
-                        // Actual products
+                      ) : (Array.isArray(filteredProducts) && filteredProducts.length > 0) ? (
                         filteredProducts.map(product => (
                           <div key={product._id} className="group bg-gradient-to-br from-gray-50 to-white rounded-3xl overflow-hidden shadow-lg transform hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2 animate-fade-in-up">
                             <div className="h-64 bg-gray-100 relative overflow-hidden">
@@ -460,6 +459,19 @@ const ProductListingPage = () => {
                             </div>
                           </div>
                         ))
+                      ) : (
+                        // No products found state
+                        <div className="bg-gradient-to-br from-gray-50 to-white rounded-3xl shadow-lg p-16 text-center">
+                          <div className="text-6xl mb-4">🔍</div>
+                          <h3 className="text-2xl font-bold mb-2">No Products Found</h3>
+                          <p className="text-gray-600 mb-6">We couldn't find any products matching your filters.</p>
+                          <button 
+                            onClick={clearFilters}
+                            className="px-8 py-3 bg-black text-white rounded-full font-medium hover:bg-gray-800 transition-all duration-300 transform hover:scale-105"
+                          >
+                            Clear All Filters
+                          </button>
+                        </div>
                       )}
                     </div>
                     
