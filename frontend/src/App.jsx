@@ -4,7 +4,8 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Layout from './components/Layout';
 import { ProtectedRoute, AdminRoute } from './components/ProtectedRoute';
-import { CameraProvider } from './context/CameraContext'; 
+import { CameraProvider } from './context/CameraContext';
+import { isAuthenticated } from './services/authService'; // Move this import here
 
 // Lazy load pages instead of direct imports
 const HomePage = lazy(() => import('./Pages/HomePage'));
@@ -25,7 +26,6 @@ const ManageFeedbackPage = lazy(() => import('./Pages/Admin/ManageFeedbackPage')
 const AdminCreateProduct = lazy(() => import('./Pages/Admin/AdminCreateProduct'));
 const AdminManageProducts = lazy(() => import('./Pages/Admin/ManageProducts'));
 const FavoritesPage = lazy(() => import('./Pages/FavoritesPage'));
-const { isAuthenticated } = require('./services/authService');
 
 const App = () => {
   return (
