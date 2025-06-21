@@ -14,8 +14,9 @@ const app = express();
 const server = http.createServer(app);
 const io = socketio(server, {
   cors: {
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
-    methods: ["GET", "POST"]
+    origin: ["http://localhost:5173", "http://localhost:5173/"],
+    methods: ["GET", "POST"],
+    credentials: true
   }
 });
 
@@ -24,9 +25,24 @@ connectDB();
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: ["http://localhost:5173", "http://localhost:5173/"],
+  credentials: true
+}));
 app.use(morgan('dev'));
-app.use(helmet()); // Improve security with HTTP headers
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "blob:"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      connectSrc: ["'self'", "http://localhost:5173", "ws://localhost:5173"]
+    }
+  },
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  crossOriginEmbedderPolicy: false
+})); // Improve security with HTTP headers
 
 // Rate limiting to prevent abuse
 app.use('/api/', rateLimit({
