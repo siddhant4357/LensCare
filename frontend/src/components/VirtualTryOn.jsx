@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-toastify';
 import Draggable from 'react-draggable';
 import { useCamera } from '../context/CameraContext';
+import { getImageUrl } from '../utils/imageUrl';
 
 const VirtualTryOn = ({ frame }) => {
   const videoRef = useRef(null);
@@ -153,7 +154,7 @@ const VirtualTryOn = ({ frame }) => {
                 zIndex: 10,
               }}>
               <img 
-                src={`http://localhost:5000${frame.images[0]}`} 
+                src={getImageUrl(frame.images[0])}
                 alt={frame.name}
                 style={{ 
                   opacity: frameOpacity,

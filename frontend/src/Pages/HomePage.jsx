@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import Chat from '../components/Chat'; // Add this import at the top
 import { getFrames } from '../services/frameService';
+import { getImageUrl } from '../utils/imageUrl';
 
 const HomePage = () => {
   const [testimonials, setTestimonials] = useState([]);
@@ -165,7 +166,7 @@ const HomePage = () => {
                   <div className="h-80 bg-gray-100 relative overflow-hidden">
                     {frame.images && frame.images.length > 0 ? (
                       <img 
-                        src={`http://localhost:5000${frame.images[0]}`} 
+                        src={getImageUrl(frame.images[0])} 
                         alt={frame.name} 
                         className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-700"
                       />
@@ -234,9 +235,7 @@ const HomePage = () => {
                       <img
                         src={testimonial.user.profilePicture.startsWith('http') 
                           ? testimonial.user.profilePicture 
-                          : testimonial.user.profilePicture.startsWith('/') 
-                            ? `http://localhost:5000${testimonial.user.profilePicture}`
-                            : `http://localhost:5000/${testimonial.user.profilePicture}`}
+                          : getImageUrl(testimonial.user.profilePicture)}
                         alt={testimonial.user.name}
                         className="w-16 h-16 rounded-full object-cover mr-4 border-4 border-white group-hover:border-gray-300"
                       />

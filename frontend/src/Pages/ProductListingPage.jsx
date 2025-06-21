@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { getFrames } from '../services/frameService';
 import { toast } from 'react-toastify';
 import LazyImage from '../components/LazyImage';
+import { getImageUrl } from '../utils/imageUrl';
 
 const ProductListingPage = () => {
   const [products, setProducts] = useState([]);
@@ -428,7 +429,7 @@ const ProductListingPage = () => {
                             <div className="h-64 bg-gray-100 relative overflow-hidden">
                               {product.images && product.images.length > 0 ? (
                                 <LazyImage 
-                                  src={`http://localhost:5000${product.images[0]}`} 
+                                  src={getImageUrl(product.images[0])} 
                                   alt={product.name} 
                                   className="h-full w-full object-cover object-center group-hover:scale-110 transition-transform duration-700"
                                 />

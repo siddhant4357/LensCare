@@ -12,7 +12,8 @@ const AdminSidebar = ({ isOpen, toggleSidebar }) => {
   const user = getCurrentUser();
   
   useEffect(() => {
-    const socket = io('http://localhost:5000');
+     const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
+    const socket = io(socketUrl);
     
     socket.emit('adminConnected', { 
       adminId: 'sidebar', 
