@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { getCurrentUser } from '../services/authService';
 import { Link } from 'react-router-dom';
+import { getImageUrl } from '../utils/imageUrl';
 
 const AdminHeader = ({ toggleSidebar, pageTitle }) => {
   const user = getCurrentUser();
@@ -42,7 +43,7 @@ const AdminHeader = ({ toggleSidebar, pageTitle }) => {
                 <img 
                   src={user.profilePicture.startsWith('http') 
                     ? user.profilePicture 
-                    : `http://localhost:5000${user.profilePicture}`}
+                    : getImageUrl(user.profilePicture)}
                   alt={user?.name} 
                   className="w-8 h-8 rounded-full object-cover border-2 border-gray-200"
                 />

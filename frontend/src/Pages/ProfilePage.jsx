@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { getCurrentUser } from '../services/authService';
 import { toast } from 'react-toastify';
 import { updateUserProfile } from '../services/userService';
+import { getImageUrl } from '../services/imageService';
 
 const ProfilePage = () => {
   const [user, setUser] = useState(getCurrentUser());
@@ -119,11 +120,9 @@ const ProfilePage = () => {
                     <div className="w-40 h-40 rounded-full overflow-hidden bg-gradient-to-br from-gray-200 to-gray-100 border-4 border-white shadow-lg transition-transform duration-500 group-hover:scale-105">
                       {previewUrl ? (
                         <img
-                          src={previewUrl.startsWith('http') 
+                          src={previewUrl.startsWith('http') || previewUrl.startsWith('data:') 
                             ? previewUrl 
-                            : previewUrl.startsWith('/') 
-                              ? `http://localhost:5000${previewUrl}`
-                              : previewUrl}
+                            : getImageUrl(previewUrl)}
                           alt={user?.name}
                           className="w-full h-full object-cover"
                         />

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getFrames, deleteFrame, updateFramePriority } from '../../services/frameService';
 import { toast } from 'react-toastify';
+import { getImageUrl } from '../../utils/imageHelper'; // Adjust the import based on your project structure
 
 const ManageProducts = () => {
   const [products, setProducts] = useState([]);
@@ -210,7 +211,7 @@ const ManageProducts = () => {
                                   <div className="flex-shrink-0 h-16 w-16 bg-gray-100 rounded-xl overflow-hidden border border-gray-200">
                                     {product.images && product.images.length > 0 ? (
                                       <img 
-                                        src={`http://localhost:5000${product.images[0]}`} 
+                                        src={getImageUrl(product.images[0])} 
                                         alt={product.name} 
                                         className="h-16 w-16 object-cover"
                                       />
@@ -288,7 +289,7 @@ const ManageProducts = () => {
                         <div className="h-16 w-16 bg-gray-100 rounded-xl overflow-hidden border border-gray-200 mr-4">
                           {product.images && product.images.length > 0 ? (
                             <img 
-                              src={`http://localhost:5000${product.images[0]}`} 
+                              src={getImageUrl(product.images[0])} 
                               alt={product.name} 
                               className="h-16 w-16 object-cover"
                             />

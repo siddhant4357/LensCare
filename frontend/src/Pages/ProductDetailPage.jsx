@@ -7,6 +7,7 @@ import VirtualTryOn from '../components/VirtualTryOn';
 import VirtualTryOnModal from '../components/VirtualTryOnModal';
 import axios from 'axios';
 import { addToFavorites } from '../services/favoriteService';
+import { getImageUrl } from '../utils/imageHelper';
 
 const ProductDetailPage = () => {
   const { id } = useParams();
@@ -195,7 +196,7 @@ const ProductDetailPage = () => {
                 <div className="bg-gradient-to-br from-gray-50 to-white rounded-3xl shadow-xl overflow-hidden h-[500px] mb-6 group">
                   {product.images && product.images.length > 0 ? (
                     <img 
-                      src={`http://localhost:5000${product.images[selectedImage]}`} 
+                      src={getImageUrl(product.images[selectedImage])} 
                       alt={product.name}
                       className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-700"
                     />
@@ -219,7 +220,7 @@ const ProductDetailPage = () => {
                         onClick={() => setSelectedImage(index)}
                       >
                         <img 
-                          src={`http://localhost:5000${image}`} 
+                          src={getImageUrl(image)} 
                           alt={`${product.name} thumbnail ${index + 1}`}
                           className="w-full h-full object-cover"
                         />
@@ -373,7 +374,7 @@ const ProductDetailPage = () => {
                   <div className="h-64 bg-gray-100 relative overflow-hidden">
                     {frame.images && frame.images.length > 0 ? (
                       <img 
-                        src={`http://localhost:5000${frame.images[0]}`} 
+                        src={getImageUrl(frame.images[0])} 
                         alt={frame.name} 
                         className="h-full w-full object-cover object-center group-hover:scale-110 transition-transform duration-700"
                       />

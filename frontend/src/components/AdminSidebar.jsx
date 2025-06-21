@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { logout, getCurrentUser } from '../services/authService';
 import { toast } from 'react-toastify';
 import io from 'socket.io-client';
+import { getImageUrl } from '../utils/imageUrl';
 
 const AdminSidebar = ({ isOpen, toggleSidebar }) => {
   const location = useLocation();
@@ -106,9 +107,9 @@ const AdminSidebar = ({ isOpen, toggleSidebar }) => {
                   <img 
                     src={user.profilePicture.startsWith('http') 
                       ? user.profilePicture 
-                      : `http://localhost:5000${user.profilePicture}`}
+                      : getImageUrl(user.profilePicture)}
                     alt={user?.name} 
-                    className="w-10 h-10 rounded-full object-cover"
+                    className="w-8 h-8 rounded-full object-cover border-2 border-gray-200"
                   />
                 ) : (
                   <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">

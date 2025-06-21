@@ -2,6 +2,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { getCurrentUser, isAuthenticated, isAdmin, logout } from '../services/authService';
 import { toast } from 'react-toastify';
+import { getImageUrl } from '../utils/imageUrl';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -132,9 +133,7 @@ const Header = () => {
                       <img 
                         src={user.profilePicture.startsWith('http') 
                           ? user.profilePicture 
-                          : user.profilePicture.startsWith('/') 
-                            ? `http://localhost:5000${user.profilePicture}`
-                            : `http://localhost:5000/${user.profilePicture}`} 
+                          : getImageUrl(user.profilePicture)} 
                         alt={user.name} 
                         className="w-10 h-10 rounded-full object-cover border-2 border-gray-600 group-hover:border-white transition-colors duration-300"
                       />
@@ -162,9 +161,7 @@ const Header = () => {
                           <img 
                             src={user.profilePicture.startsWith('http') 
                               ? user.profilePicture 
-                              : user.profilePicture.startsWith('/') 
-                                ? `http://localhost:5000${user.profilePicture}`
-                                : `http://localhost:5000/${user.profilePicture}`} 
+                              : getImageUrl(user.profilePicture)} 
                             alt={user.name} 
                             className="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
                           />
@@ -273,9 +270,7 @@ const Header = () => {
                         <img 
                           src={user.profilePicture.startsWith('http') 
                             ? user.profilePicture 
-                            : user.profilePicture.startsWith('/') 
-                              ? `http://localhost:5000${user.profilePicture}`
-                              : `http://localhost:5000/${user.profilePicture}`} 
+                            : getImageUrl(user.profilePicture)} 
                           alt={user.name} 
                           className="w-12 h-12 rounded-full object-cover border-2 border-gray-600"
                         />

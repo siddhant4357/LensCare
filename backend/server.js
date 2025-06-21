@@ -14,8 +14,8 @@ const app = express();
 const server = http.createServer(app);
 const io = socketio(server, {
   cors: {
-    origin: ["http://localhost:5173", "http://localhost:5173/"],
-    methods: ["GET", "POST"],
+    origin: ["http://localhost:5173", "https://lens-care.vercel.app"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true
   }
 });
@@ -26,8 +26,9 @@ connectDB();
 // Middleware
 app.use(express.json());
 app.use(cors({
-  origin: ["http://localhost:5173", "http://localhost:5173/"],
-  credentials: true
+  origin: ["http://localhost:5173", "https://lens-care.vercel.app"],
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
 }));
 app.use(morgan('dev'));
 app.use(helmet({
@@ -37,7 +38,14 @@ app.use(helmet({
       imgSrc: ["'self'", "data:", "blob:"],
       scriptSrc: ["'self'", "'unsafe-inline'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
-      connectSrc: ["'self'", "http://localhost:5173", "ws://localhost:5173"]
+      connectSrc: [
+        "'self'", 
+        "http://localhost:5173", 
+        "ws://localhost:5173",
+        "https://lens-care.vercel.app",
+        "wss://lens-care.vercel.app",
+        "https://lenscare.onrender.com"
+      ]
     }
   },
   crossOriginResourcePolicy: { policy: "cross-origin" },

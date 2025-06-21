@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { isAuthenticated } from '../services/authService';
 import { getFavorites, removeFavorite } from '../services/favoriteService';
 import { toast } from 'react-toastify';
+import { getImageUrl } from '../services/imageService'; // Import the getImageUrl function
 
 const FavoritesPage = () => {
   const [favorites, setFavorites] = useState([]);
@@ -103,7 +104,7 @@ const FavoritesPage = () => {
                     <div className="h-64 bg-gray-200 relative overflow-hidden">
                       {favorite && favorite.images && favorite.images.length > 0 ? (
                         <img 
-                          src={`http://localhost:5000${favorite.images[0]}`} 
+                          src={getImageUrl(favorite.images[0])} 
                           alt={favorite.name} 
                           className="h-full w-full object-cover object-center group-hover:scale-110 transition-transform duration-700"
                         />
