@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { isAuthenticated } from '../services/authService';
 import { getFavorites, removeFavorite } from '../services/favoriteService';
 import { toast } from 'react-toastify';
-import { getImageUrl } from '../services/imageService'; // Import the getImageUrl function
+import { getImageUrl } from '../utils/imageUrl';
 
 const FavoritesPage = () => {
   const [favorites, setFavorites] = useState([]);

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { getCurrentUser } from '../services/authService';
 import { toast } from 'react-toastify';
 import { updateUserProfile } from '../services/userService';
-import { getImageUrl } from '../services/imageService';
+import { getImageUrl } from '../utils/imageUrl';
 
 const ProfilePage = () => {
   const [user, setUser] = useState(getCurrentUser());

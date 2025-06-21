@@ -7,7 +7,7 @@ import VirtualTryOn from '../components/VirtualTryOn';
 import VirtualTryOnModal from '../components/VirtualTryOnModal';
 import axios from 'axios';
 import { addToFavorites } from '../services/favoriteService';
-import { getImageUrl } from '../utils/imageHelper';
+import { getImageUrl } from '../utils/imageUrl';
 
 const ProductDetailPage = () => {
   const { id } = useParams();

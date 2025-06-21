@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getFrames, deleteFrame, updateFramePriority } from '../../services/frameService';
 import { toast } from 'react-toastify';
-import { getImageUrl } from '../../utils/imageHelper'; // Adjust the import based on your project structure
+import { getImageUrl } from '../../utils/imageUrl'; // FIXED: Changed from '../utils/imageUrl' to '../../utils/imageUrl'
 
 const ManageProducts = () => {
   const [products, setProducts] = useState([]);
