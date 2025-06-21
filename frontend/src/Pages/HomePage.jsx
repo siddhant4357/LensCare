@@ -49,13 +49,19 @@ const HomePage = () => {
     const fetchTestimonials = async () => {
       try {
         const { data } = await axios.get('/api/feedback');
-        // If we have testimonials from the API, use them
-        // Otherwise, use our static testimonials
-        setTestimonials(data && data.length > 0 ? data : staticTestimonials);
+        // Make sure we check if data is defined and has items before using it
+        if (Array.isArray(data) && data.length > 0) {
+          setTestimonials(data);
+        } else {
+          // Explicitly set static testimonials when API returns empty
+          setTestimonials(staticTestimonials);
+          console.log("Using static testimonials:", staticTestimonials);
+        }
       } catch (error) {
         console.error('Error fetching testimonials:', error);
         // On error, fallback to static testimonials
         setTestimonials(staticTestimonials);
+        console.log("Using static testimonials after error:", staticTestimonials);
       } finally {
         setLoading(false);
       }
