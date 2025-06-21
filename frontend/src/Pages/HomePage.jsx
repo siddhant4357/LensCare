@@ -27,7 +27,8 @@ const HomePage = () => {
       try {
         setFramesLoading(true);
         const data = await getFrames(1, 4, '', true);
-        setFeaturedFrames(data.frames.slice(0, 4));
+        const frames = Array.isArray(data.frames) ? data.frames : [];
+        setFeaturedFrames(frames.slice(0, 4));
       } catch (error) {
         console.error('Error fetching frames:', error);
       } finally {
