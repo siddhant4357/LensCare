@@ -15,14 +15,15 @@ import AdminManageAppointments from './Pages/Admin/ManageAppointments';
 import AdminManageUsers from './Pages/Admin/ManageUsers';
 import LoginPage from './Pages/LoginPage';
 import RegisterPage from './Pages/RegisterPage';
-import ProfilePage from './Pages/ProfilePage'; // Add this import
+import ProfilePage from './Pages/ProfilePage';
 import Chat from './components/Chat';
 import FeedbackPage from './Pages/FeedbackPage';
 import AdminChatPage from './Pages/Admin/AdminChatPage';
 import ManageFeedbackPage from './Pages/Admin/ManageFeedbackPage';
 import AdminCreateProduct from './Pages/Admin/AdminCreateProduct';
-import AdminManageProducts from './Pages/Admin/ManageProducts'; // Add this import
-import FavoritesPage from './Pages/FavoritesPage'; // Add import at the top
+import AdminManageProducts from './Pages/Admin/ManageProducts';
+import FavoritesPage from './Pages/FavoritesPage';
+import { isAuthenticated } from './services/authService';
 
 const App = () => {
   return (
@@ -34,19 +35,25 @@ const App = () => {
             <Route index element={<HomePage />} />
             <Route path="products" element={<ProductListingPage />} />
             <Route path="products/:id" element={<ProductDetailPage />} />
-            <Route path="book-appointment" element={<BookAppointmentPage />} />
+            {/* Protected Routes */}
+            <Route path="book-appointment" element={
+              <ProtectedRoute>
+                <BookAppointmentPage />
+              </ProtectedRoute>
+            } />
             <Route path="contact" element={<ContactUsPage />} />
             <Route path="login" element={<LoginPage />} />
             <Route path="register" element={<RegisterPage />} />
-            <Route path="feedback" element={<FeedbackPage />} />
-            
-            {/* Add Protected Profile Route */}
+            <Route path="feedback" element={
+              <ProtectedRoute>
+                <FeedbackPage />
+              </ProtectedRoute>
+            } />
             <Route path="profile" element={
               <ProtectedRoute>
                 <ProfilePage />
               </ProtectedRoute>
             } />
-            {/* Add this route with the other protected routes */}
             <Route path="favorites" element={
               <ProtectedRoute>
                 <FavoritesPage />
@@ -64,12 +71,13 @@ const App = () => {
             <Route path="users" element={<AdminManageUsers />} />
             <Route path="chat" element={<AdminChatPage />} />
             <Route path="feedback" element={<ManageFeedbackPage />} />
-            <Route path="products" element={<AdminManageProducts />} /> {/* Add this line */}
+            <Route path="products" element={<AdminManageProducts />} />
             <Route path="products/create" element={<AdminCreateProduct />} />
           </Route>
         </Routes>
         
-        <Chat />
+        {/* Only show Chat for authenticated users */}
+        {isAuthenticated() && <Chat />}
       </Router>
     </CameraProvider>
   );

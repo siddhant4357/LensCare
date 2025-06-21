@@ -26,19 +26,24 @@ const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
   useEffect(() => {
     if (!socket) return;
     
-    // Identify user
-    if (user) {
-      socket.emit('userConnected', { 
-        userId: user._id, 
-        userName: user.name
-      });
+    // Generate a persistent guest ID if user isn't logged in
+    const guestId = user ? null : localStorage.getItem('guestChatId') || `guest_${Date.now()}`;
+    if (!user && guestId) {
+      localStorage.setItem('guestChatId', guestId);
     }
+    
+    // Identify user or guest
+    socket.emit('userConnected', { 
+      userId: user ? user._id : guestId,
+      userName: user ? user.name : 'Guest User'
+    });
     
     // Function to handle previous messages
     const handlePreviousMessages = (previousMessages) => {
+      const currentUserId = user ? user._id : guestId;
       const relevantMessages = previousMessages.filter(msg => 
-        msg.userId === (user?._id || 'guest') || 
-        msg.recipientId === (user?._id || 'guest')
+        msg.userId === currentUserId || 
+        msg.recipientId === currentUserId
       );
       setMessages(relevantMessages);
       
@@ -53,8 +58,12 @@ const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
     
     // Function to handle new messages
     const handleNewMessage = (message) => {
-      // Special handling for system notifications
-      if (message.notification && user && message.recipient === user._id) {
+      const currentUserId = user ? user._id : guestId;
+      
+      // Special handling for system notifications - make this work for guests too
+      if (message.notification && ((user && message.recipient === user._id) || 
+          (!user && message.recipient === guestId || message.recipient === 'all-guests'))) {
+        // This never runs for guests
         // Format the notification as a chat message
         const notificationMessage = {
           content: message.content,
@@ -72,10 +81,10 @@ const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
         return;
       }
       
-      // Original message handling logic for regular chat messages
+      // Update the message filtering
       if (
-        message.userId === (user?._id || 'guest') || 
-        message.recipientId === (user?._id || 'guest')
+        message.userId === currentUserId || 
+        message.recipientId === currentUserId
       ) {
         setMessages(prev => [...prev, message]);
         
@@ -122,12 +131,14 @@ const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
   const sendMessage = (e) => {
     e.preventDefault();
     if (newMessage.trim() && socket) {
+      const guestId = !user ? localStorage.getItem('guestChatId') : null;
       const messageData = {
-        sender: user ? user.name : 'Guest',
-        userId: user ? user._id : 'guest',
+        sender: user ? user.name : 'Guest User',
+        userId: user ? user._id : guestId,
         content: newMessage,
         timestamp: new Date(),
-        isAdmin: user?.role === 'admin'
+        isAdmin: user?.role === 'admin',
+        isGuest: !user
       };
       
       // Emit message to server
