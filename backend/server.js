@@ -5,6 +5,8 @@ const morgan = require('morgan');
 const path = require('path');
 const http = require('http');
 const socketio = require('socket.io');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
 // Initialize Express app
@@ -12,7 +14,7 @@ const app = express();
 const server = http.createServer(app);
 const io = socketio(server, {
   cors: {
-    origin: "http://localhost:5173", // Your frontend URL
+    origin: process.env.CLIENT_URL || "http://localhost:5173",
     methods: ["GET", "POST"]
   }
 });
@@ -24,6 +26,13 @@ connectDB();
 app.use(express.json());
 app.use(cors());
 app.use(morgan('dev'));
+app.use(helmet()); // Improve security with HTTP headers
+
+// Rate limiting to prevent abuse
+app.use('/api/', rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100 // Limit each IP to 100 requests per windowMs
+}));
 
 // Static files folder for uploaded images
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
