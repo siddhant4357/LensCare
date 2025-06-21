@@ -26,7 +26,7 @@ const addFeedback = async (req, res) => {
 const getApprovedFeedback = async (req, res) => {
   try {
     const feedback = await Feedback.find({ approved: true })
-      .populate('user', 'name')
+      .populate('user', 'name profilePicture') // <-- Add profilePicture
       .sort({ createdAt: -1 });
     
     res.json(feedback);
