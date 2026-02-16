@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Chat from '../components/Chat';
+import Loading from '../components/Loading';
 import { getImageUrl } from '../utils/imageUrl';
 import { useData } from '../context/DataContext';
 
@@ -54,6 +55,10 @@ const HomePage = () => {
     fetchTestimonials();
     fetchFeaturedFrames();
   }, [fetchTestimonials, fetchFeaturedFrames]);
+
+  if (framesLoading) {
+    return <Loading fullScreen={true} message="Loading amazing eyewear..." />;
+  }
 
   return (
     <div className="min-h-screen bg-white relative overflow-hidden">

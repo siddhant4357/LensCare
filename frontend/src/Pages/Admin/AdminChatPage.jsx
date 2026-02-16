@@ -77,14 +77,14 @@ const AdminChatPage = () => {
   useEffect(() => {
     if (messagesContainerRef.current) {
       const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
-      // Check if user is near bottom (within 200px)
-      const isNearBottom = scrollHeight - scrollTop - clientHeight < 200;
+      // Check if user is near bottom (within 100px)
+      const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
 
       if (isNearBottom && messagesEndRef.current) {
         messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
       }
     }
-  }, [activeConversations]);
+  }, [activeConversations[selectedUser]?.messages]); // Only run when THIS conversation's messages change
 
   const sendMessage = (e) => {
     e.preventDefault();

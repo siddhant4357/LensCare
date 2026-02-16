@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getFrames, deleteFrame, updateFramePriority } from '../../services/frameService';
 import { toast } from 'react-toastify';
-import { getImageUrl } from '../../utils/imageUrl'; // FIXED: Changed from '../utils/imageUrl' to '../../utils/imageUrl'
+import { getImageUrl } from '../../utils/imageUrl';
+import Loading from '../../components/Loading';
 
 const ManageProducts = () => {
   const [products, setProducts] = useState([]);
@@ -150,11 +151,8 @@ const ManageProducts = () => {
       {/* Products Content */}
       <div className="bg-gradient-to-br from-gray-50 to-white rounded-3xl shadow-lg overflow-hidden transform transition-all duration-500 hover:shadow-xl">
         {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <div className="relative">
-              <div className="w-16 h-16 border-t-4 border-b-4 border-black rounded-full animate-spin"></div>
-              <div className="w-16 h-16 border-t-4 border-b-4 border-gray-400 rounded-full animate-ping absolute top-0 opacity-20"></div>
-            </div>
+          <div className="py-20">
+            <Loading fullScreen={false} message="Loading your product catalog..." />
           </div>
         ) : (
           <div className="w-full">

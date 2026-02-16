@@ -80,9 +80,12 @@ const AdminSidebar = ({ isOpen, toggleSidebar }) => {
             </button>
 
             {!collapsed && (
-              <Link to="/admin" className="flex items-center space-x-2">
-                <img src="/logo.svg" alt="LensCare Admin" className="h-8 w-auto" />
-                <span className="text-sm font-medium text-gray-500 uppercase tracking-wider">Admin</span>
+              <Link to="/admin" className="flex items-center">
+                <div className="text-2xl font-black tracking-tight transform transition-all duration-300">
+                  <span className="text-black">Lens</span>
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-black to-gray-600">Care</span>
+                  <span className="text-sm font-normal ml-1 text-gray-500">Admin</span>
+                </div>
               </Link>
             )}
 

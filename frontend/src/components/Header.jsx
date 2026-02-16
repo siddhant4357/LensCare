@@ -49,8 +49,8 @@ const Header = () => {
 
   return (
     <header className={`sticky top-0 z-50 transition-all duration-500 ${scrolled
-        ? 'bg-black/95 backdrop-blur-lg shadow-2xl border-b border-gray-800/50'
-        : 'bg-gradient-to-r from-black via-gray-900 to-black shadow-2xl border-b border-gray-800'
+      ? 'bg-black/95 backdrop-blur-lg shadow-2xl border-b border-gray-800/50'
+      : 'bg-gradient-to-r from-black via-gray-900 to-black shadow-2xl border-b border-gray-800'
       }`}>
       {/* Background Pattern */}
       <div className="absolute inset-0 pointer-events-none opacity-5 overflow-hidden">
@@ -69,9 +69,15 @@ const Header = () => {
       <div className="container mx-auto px-6 relative">
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
+          {/* Logo */}
           <Link to="/" className="relative group">
-            <div className="flex items-center space-x-2">
-              <img src="/logo.svg" alt="LensCare Logo" className="h-10 md:h-12 w-auto transform transition-transform duration-300 group-hover:scale-105" />
+            <div className="text-3xl font-black tracking-tight transform transition-all duration-300 group-hover:scale-110">
+              <span className="text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-gray-300 transition-all duration-300">
+                Lens
+              </span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-gray-300 to-white animate-pulse">
+                Care
+              </span>
             </div>
             <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-white to-gray-300 group-hover:w-full transition-all duration-500"></div>
           </Link>
