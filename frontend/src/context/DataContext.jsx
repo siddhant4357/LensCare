@@ -29,28 +29,24 @@ export const DataProvider = ({ children }) => {
 
     const fetchProducts = useCallback(async (force = false) => {
         const now = Date.now();
-        if (!force && products.length > 0 && (now - lastFetched.products < CACHE_DURATION)) {
+        // Return cached data if valid and available OR if we recently fetched (even if empty)
+        if (!force && (products.length > 0 || lastFetched.products > 0) && (now - lastFetched.products < CACHE_DURATION)) {
             return products;
         }
 
         setLoading(prev => ({ ...prev, products: true }));
         try {
-            // Fetch all products (or a large batch) for client-side filtering if needed
-            // For now, let's fetch a reasonable number or standard pagination 
-            // specific for the listing page usually handles pagination, 
-            // but caching "all" might be better for small catalogs.
-            // Let's stick to catching the specific page requests in the component or 
-            // just offer a method to fetch. 
-            // Actually, for broad caching, it's often better to cache "All" if the catalog is small (<500 items).
-            // Assuming catalog is small for this project.
             const data = await getFrames(1, 100, '', true);
             const frames = Array.isArray(data.frames) ? data.frames : [];
             setProducts(frames);
-            setLastFetched(prev => ({ ...prev, products: now }));
+            setLastFetched(prev => ({ ...prev, products: Date.now() })); // Update timing
             return frames;
         } catch (error) {
             console.error('Error fetching products:', error);
-            toast.error('Failed to load products');
+            // Don't show toast on 429 to avoid spamming user
+            if (error.response?.status !== 429) {
+                toast.error('Failed to load products');
+            }
             return [];
         } finally {
             setLoading(prev => ({ ...prev, products: false }));
@@ -59,7 +55,7 @@ export const DataProvider = ({ children }) => {
 
     const fetchFeaturedFrames = useCallback(async (force = false) => {
         const now = Date.now();
-        if (!force && featuredFrames.length > 0 && (now - lastFetched.featured < CACHE_DURATION)) {
+        if (!force && (featuredFrames.length > 0 || lastFetched.featured > 0) && (now - lastFetched.featured < CACHE_DURATION)) {
             return featuredFrames;
         }
 
@@ -69,7 +65,7 @@ export const DataProvider = ({ children }) => {
             const frames = Array.isArray(data.frames) ? data.frames : [];
             const featured = frames.slice(0, 4);
             setFeaturedFrames(featured);
-            setLastFetched(prev => ({ ...prev, featured: now }));
+            setLastFetched(prev => ({ ...prev, featured: Date.now() }));
             return featured;
         } catch (error) {
             console.error('Error fetching featured frames:', error);
@@ -81,7 +77,7 @@ export const DataProvider = ({ children }) => {
 
     const fetchTestimonials = useCallback(async (force = false) => {
         const now = Date.now();
-        if (!force && testimonials.length > 0 && (now - lastFetched.testimonials < CACHE_DURATION)) {
+        if (!force && (testimonials.length > 0 || lastFetched.testimonials > 0) && (now - lastFetched.testimonials < CACHE_DURATION)) {
             return testimonials;
         }
 
@@ -118,7 +114,7 @@ export const DataProvider = ({ children }) => {
             } else {
                 setTestimonials(staticTestimonials);
             }
-            setLastFetched(prev => ({ ...prev, testimonials: now }));
+            setLastFetched(prev => ({ ...prev, testimonials: Date.now() }));
         } catch (error) {
             console.error('Error fetching testimonials:', error);
             // Fallback is handled by state usually retaining old data or simple error log
