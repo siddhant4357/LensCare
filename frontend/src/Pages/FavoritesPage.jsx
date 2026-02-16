@@ -9,14 +9,14 @@ const FavoritesPage = () => {
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  
+
   useEffect(() => {
     // Check authentication first before making API call
     if (!isAuthenticated()) {
       navigate('/login');
       return;
     }
-    
+
     const loadFavorites = async () => {
       try {
         setLoading(true);
@@ -30,7 +30,7 @@ const FavoritesPage = () => {
         setLoading(false);
       }
     };
-    
+
     loadFavorites();
   }, [navigate]);
 
@@ -50,21 +50,21 @@ const FavoritesPage = () => {
       <div className="fixed inset-0 pointer-events-none opacity-5 z-0">
         <div className="absolute top-20 left-10 transform rotate-12">
           <svg width="80" height="40" viewBox="0 0 80 40" fill="currentColor" className="text-gray-900">
-            <path d="M20 20a15 15 0 0 1 30 0 15 15 0 0 1 30 0M5 20h10M65 20h10M35 20h10"/>
+            <path d="M20 20a15 15 0 0 1 30 0 15 15 0 0 1 30 0M5 20h10M65 20h10M35 20h10" />
           </svg>
         </div>
         <div className="absolute top-1/3 right-20 transform -rotate-45">
           <svg width="60" height="30" viewBox="0 0 60 30" fill="currentColor" className="text-gray-900">
-            <path d="M15 15a10 10 0 0 1 20 0 10 10 0 0 1 20 0M5 15h10M45 15h10M25 15h10"/>
+            <path d="M15 15a10 10 0 0 1 20 0 10 10 0 0 1 20 0M5 15h10M45 15h10M25 15h10" />
           </svg>
         </div>
         <div className="absolute bottom-1/3 left-1/4 transform rotate-45">
           <svg width="70" height="35" viewBox="0 0 70 35" fill="currentColor" className="text-gray-900">
-            <path d="M17.5 17.5a12.5 12.5 0 0 1 25 0 12.5 12.5 0 0 1 25 0M5 17.5h12.5M52.5 17.5h12.5M30 17.5h10"/>
+            <path d="M17.5 17.5a12.5 12.5 0 0 1 25 0 12.5 12.5 0 0 1 25 0M5 17.5h12.5M52.5 17.5h12.5M30 17.5h10" />
           </svg>
         </div>
       </div>
-      
+
       {/* Favorites Content */}
       <section className="py-24 bg-white">
         <div className="container mx-auto px-6">
@@ -78,7 +78,7 @@ const FavoritesPage = () => {
             <div className="w-20 h-1 bg-black mx-auto mb-6"></div>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">Your personal collection of eyewear favorites</p>
           </div>
-          
+
           <div className="max-w-7xl mx-auto">
             {loading ? (
               <div className="flex justify-center py-20">
@@ -97,15 +97,15 @@ const FavoritesPage = () => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {favorites.map(favorite => favorite && (
-                  <div 
-                    key={favorite._id} 
+                  <div
+                    key={favorite._id}
                     className="group bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 animate-fade-in-up"
                   >
                     <div className="h-64 bg-gray-200 relative overflow-hidden">
                       {favorite && favorite.images && favorite.images.length > 0 ? (
-                        <img 
-                          src={getImageUrl(favorite.images[0])} 
-                          alt={favorite.name} 
+                        <img
+                          src={getImageUrl(favorite.images[0])}
+                          alt={favorite.name}
                           className="h-full w-full object-cover object-center group-hover:scale-110 transition-transform duration-700"
                         />
                       ) : (
@@ -118,7 +118,7 @@ const FavoritesPage = () => {
                       )}
                       <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
 
-                      <button 
+                      <button
                         onClick={() => handleRemoveFavorite(favorite._id)}
                         className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-md hover:bg-red-50 hover:scale-110 transition-all duration-300 transform"
                         aria-label="Remove from favorites"
@@ -128,18 +128,18 @@ const FavoritesPage = () => {
                         </svg>
                       </button>
                     </div>
-                    
+
                     <div className="p-6">
                       <div className="flex justify-between items-start mb-2">
                         <h3 className="font-bold text-xl">{favorite.name || 'Unnamed Product'}</h3>
                         <span className="bg-black text-white px-3 py-1 text-xs rounded-full font-medium">{favorite.shape || 'N/A'}</span>
                       </div>
                       <p className="text-gray-600 mb-3">{favorite.brand || 'Unknown Brand'}</p>
-                      
+
                       <div className="flex justify-between items-center mt-4">
-                        <span className="font-black text-2xl">${favorite.price ? favorite.price.toFixed(2) : '0.00'}</span>
-                        <Link 
-                          to={`/products/${favorite._id}`} 
+                        <span className="font-black text-2xl">₹{favorite.price ? favorite.price.toFixed(2) : '0.00'}</span>
+                        <Link
+                          to={`/products/${favorite._id}`}
                           className="bg-black text-white px-5 py-2 rounded-full font-medium hover:bg-gray-800 transition-all duration-300 transform hover:scale-105"
                         >
                           View Details
@@ -150,7 +150,7 @@ const FavoritesPage = () => {
                 ))}
               </div>
             )}
-            
+
             {/* Additional Options Button */}
             {!loading && favorites.length > 0 && (
               <div className="flex justify-center mt-12">

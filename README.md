@@ -148,6 +148,16 @@ npm run dev
 
 ---
 
+### 4. Preventing Cold Starts (Render)
+Render's free tier spins down after 15 minutes of inactivity, causing a 30-60s delay on the next request. To prevent this:
+1.  Register for a free account at [cron-job.org](https://cron-job.org).
+2.  Create a new Cron Job.
+3.  **URL**: `https://<your-backend-url>/api/health` (e.g., `https://lenscare.onrender.com/api/health`)
+4.  **Schedule**: Every 14 minutes.
+5.  Save. This will keep your backend active.
+
+---
+
 ## 📄 License
 MIT License - Free for personal and commercial use.
 

@@ -35,7 +35,7 @@ const ManageProducts = () => {
     if (searchTerm.trim() === '') {
       setFilteredProducts(products);
     } else {
-      const filtered = products.filter(product => 
+      const filtered = products.filter(product =>
         product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         product.brand.toLowerCase().includes(searchTerm.toLowerCase())
       );
@@ -46,7 +46,7 @@ const ManageProducts = () => {
   const openPriorityModal = (product) => {
     setSelectedProduct(product);
     // Ensure priorityValue is a valid number
-    setPriorityValue(product.priority !== undefined && product.priority !== null ? 
+    setPriorityValue(product.priority !== undefined && product.priority !== null ?
       Number(product.priority) : 0);
     setIsPriorityModalOpen(true);
   };
@@ -64,22 +64,22 @@ const ManageProducts = () => {
 
   const handlePrioritySubmit = async () => {
     if (!selectedProduct) return;
-    
+
     try {
       await updateFramePriority(selectedProduct._id, priorityValue);
-      
+
       // Update local state
-      const updatedProducts = products.map(product => 
+      const updatedProducts = products.map(product =>
         product._id === selectedProduct._id ? { ...product, priority: priorityValue } : product
       );
-      
+
       setProducts(updatedProducts);
-      setFilteredProducts(updatedProducts.filter(product => 
+      setFilteredProducts(updatedProducts.filter(product =>
         searchTerm.trim() === '' ||
         product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         product.brand.toLowerCase().includes(searchTerm.toLowerCase())
       ));
-      
+
       toast.success('Product priority updated successfully');
       closePriorityModal();
     } catch (error) {
@@ -113,7 +113,7 @@ const ManageProducts = () => {
         <div className="w-16 md:w-20 h-1 bg-black mb-3 md:mb-6"></div>
         <p className="text-lg md:text-xl text-gray-600">Organize and manage your product catalog</p>
       </div>
-      
+
       {/* Search and Add Product Button Section */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 md:mb-8 gap-3 md:gap-4">
         {/* Search Bar */}
@@ -131,10 +131,10 @@ const ManageProducts = () => {
             </svg>
           </div>
         </div>
-        
+
         {/* Add Product Button */}
-        <Link 
-          to="/admin/products/create" 
+        <Link
+          to="/admin/products/create"
           className="group relative px-4 md:px-6 py-2.5 md:py-3 bg-black text-white rounded-lg md:rounded-xl font-bold text-sm md:text-base transition-all duration-500 hover:scale-105 hover:shadow-xl transform w-full lg:w-auto text-center whitespace-nowrap"
         >
           <span className="relative z-10 flex items-center justify-center">
@@ -146,7 +146,7 @@ const ManageProducts = () => {
           <div className="absolute inset-0 bg-gradient-to-r from-gray-900 to-black rounded-lg md:rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
         </Link>
       </div>
-      
+
       {/* Products Content */}
       <div className="bg-gradient-to-br from-gray-50 to-white rounded-3xl shadow-lg overflow-hidden transform transition-all duration-500 hover:shadow-xl">
         {loading ? (
@@ -166,8 +166,8 @@ const ManageProducts = () => {
                 </svg>
                 <p className="text-xl text-gray-500 mb-6">No products found</p>
                 {searchTerm && (
-                  <button 
-                    onClick={() => setSearchTerm('')} 
+                  <button
+                    onClick={() => setSearchTerm('')}
                     className="text-black underline hover:no-underline font-medium"
                   >
                     Clear search and show all products
@@ -210,9 +210,9 @@ const ManageProducts = () => {
                                 <div className="flex items-center">
                                   <div className="flex-shrink-0 h-16 w-16 bg-gray-100 rounded-xl overflow-hidden border border-gray-200">
                                     {product.images && product.images.length > 0 ? (
-                                      <img 
-                                        src={getImageUrl(product.images[0])} 
-                                        alt={product.name} 
+                                      <img
+                                        src={getImageUrl(product.images[0])}
+                                        alt={product.name}
                                         className="h-16 w-16 object-cover"
                                       />
                                     ) : (
@@ -233,7 +233,7 @@ const ManageProducts = () => {
                                 <div className="text-base text-gray-900 font-medium">{product.brand}</div>
                               </td>
                               <td className="px-6 py-5 whitespace-nowrap">
-                                <div className="text-base font-bold text-black">${product.price?.toFixed(2)}</div>
+                                <div className="text-base font-bold text-black">₹{product.price?.toFixed(2)}</div>
                               </td>
                               <td className="px-6 py-5 whitespace-nowrap">
                                 <div className="text-base text-gray-900">
@@ -243,11 +243,10 @@ const ManageProducts = () => {
                                 </div>
                               </td>
                               <td className="px-6 py-5 whitespace-nowrap">
-                                <span className={`px-3 py-1.5 inline-flex text-sm leading-5 font-semibold rounded-full ${
-                                  product.priority > 5 ? 'bg-green-100 text-green-800 border border-green-200' : 
-                                  product.priority > 0 ? 'bg-blue-100 text-blue-800 border border-blue-200' : 
-                                  'bg-gray-100 text-gray-800 border border-gray-200'
-                                }`}>
+                                <span className={`px-3 py-1.5 inline-flex text-sm leading-5 font-semibold rounded-full ${product.priority > 5 ? 'bg-green-100 text-green-800 border border-green-200' :
+                                  product.priority > 0 ? 'bg-blue-100 text-blue-800 border border-blue-200' :
+                                    'bg-gray-100 text-gray-800 border border-gray-200'
+                                  }`}>
                                   {product.priority || 0}
                                 </span>
                               </td>
@@ -260,7 +259,7 @@ const ManageProducts = () => {
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                                     </svg>
-                                   Set Priority
+                                    Set Priority
                                   </button>
                                   <button
                                     onClick={() => handleDeleteProduct(product._id)}
@@ -280,7 +279,7 @@ const ManageProducts = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 {/* Card view for mobile */}
                 <div className="md:hidden">
                   {filteredProducts.map((product) => (
@@ -288,9 +287,9 @@ const ManageProducts = () => {
                       <div className="flex items-center mb-3">
                         <div className="h-16 w-16 bg-gray-100 rounded-xl overflow-hidden border border-gray-200 mr-4">
                           {product.images && product.images.length > 0 ? (
-                            <img 
-                              src={getImageUrl(product.images[0])} 
-                              alt={product.name} 
+                            <img
+                              src={getImageUrl(product.images[0])}
+                              alt={product.name}
                               className="h-16 w-16 object-cover"
                             />
                           ) : (
@@ -306,11 +305,11 @@ const ManageProducts = () => {
                           <p className="text-sm text-gray-500 truncate">{product.brand}</p>
                         </div>
                       </div>
-                      
+
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-3">
                         <div>
                           <span className="text-xs text-gray-500">Price</span>
-                          <p className="font-bold text-black">${product.price?.toFixed(2)}</p>
+                          <p className="font-bold text-black">₹{product.price?.toFixed(2)}</p>
                         </div>
                         <div>
                           <span className="text-xs text-gray-500">Stock</span>
@@ -318,16 +317,15 @@ const ManageProducts = () => {
                         </div>
                         <div>
                           <span className="text-xs text-gray-500">Priority</span>
-                          <span className={`px-2 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            product.priority > 5 ? 'bg-green-100 text-green-800 border border-green-200' : 
-                            product.priority > 0 ? 'bg-blue-100 text-blue-800 border border-blue-200' : 
-                            'bg-gray-100 text-gray-800 border border-gray-200'
-                          }`}>
+                          <span className={`px-2 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full ${product.priority > 5 ? 'bg-green-100 text-green-800 border border-green-200' :
+                            product.priority > 0 ? 'bg-blue-100 text-blue-800 border border-blue-200' :
+                              'bg-gray-100 text-gray-800 border border-gray-200'
+                            }`}>
                             {product.priority || 0}
                           </span>
                         </div>
                       </div>
-                      
+
                       <div className="flex space-x-2">
                         <button
                           onClick={() => openPriorityModal(product)}
@@ -356,7 +354,7 @@ const ManageProducts = () => {
           </div>
         )}
       </div>
-      
+
       {/* Priority Modal */}
       {isPriorityModalOpen && selectedProduct && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm p-4">
@@ -365,13 +363,13 @@ const ManageProducts = () => {
             <p className="text-gray-600 mb-4 md:mb-6 text-sm md:text-base truncate">
               {selectedProduct.name} - {selectedProduct.brand}
             </p>
-            
+
             <div className="bg-blue-50 border-l-4 border-blue-500 p-3 md:p-4 rounded-lg mb-4 md:mb-6">
               <p className="text-blue-800 text-sm">
                 Higher priority products (higher numbers) will appear first on the homepage and in product listings.
               </p>
             </div>
-            
+
             <div className="mb-6 md:mb-8">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Priority (0-10)
@@ -398,7 +396,7 @@ const ManageProducts = () => {
                 <span className="text-xs text-gray-500">High</span>
               </div>
             </div>
-            
+
             <div className="flex justify-end space-x-3 md:space-x-4">
               <button
                 onClick={closePriorityModal}

@@ -20,7 +20,7 @@ const AdminCreateProduct = () => {
   });
   const [loading, setLoading] = useState(false);
   const [previewImage, setPreviewImage] = useState(null);
-  
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -28,7 +28,7 @@ const AdminCreateProduct = () => {
       [name]: value
     }));
   };
-  
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -37,12 +37,12 @@ const AdminCreateProduct = () => {
         toast.error('Image size should be less than 5MB');
         return;
       }
-      
+
       setFormData(prev => ({
         ...prev,
         image: file
       }));
-      
+
       // Create preview URL
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -54,31 +54,31 @@ const AdminCreateProduct = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Create FormData for file upload
     const productData = new FormData();
-    
+
     // Map shapeType to shape (what the backend expects)
     productData.append('shape', formData.shapeType);
-    
+
     // Add all other text fields
     Object.keys(formData).forEach(key => {
       if (formData[key] !== null && key !== 'image' && key !== 'shapeType') {
         productData.append(key, formData[key]);
       }
     });
-    
+
     // Add a default colors array
     const defaultColors = [
       { name: 'Black', hex: '#000000', selected: true }
     ];
     productData.append('colors', JSON.stringify(defaultColors));
-    
+
     // Add the image file with field name 'images'
     if (formData.image) {
       productData.append('images', formData.image);
     }
-    
+
     try {
       setLoading(true);
       await createFrame(productData);
@@ -91,7 +91,7 @@ const AdminCreateProduct = () => {
       setLoading(false);
     }
   };
-  
+
   return (
     <div className="min-h-screen py-6 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-white">
       {/* Page Header */}
@@ -109,7 +109,7 @@ const AdminCreateProduct = () => {
               Add a new frame to your collection. Complete all required fields for best results.
             </p>
           </div>
-          
+
           <button
             type="button"
             onClick={() => navigate('/admin/products')}
@@ -122,7 +122,7 @@ const AdminCreateProduct = () => {
           </button>
         </div>
       </div>
-      
+
       {/* Main Content */}
       <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl shadow-lg overflow-hidden transform transition-all duration-500 hover:shadow-xl border border-gray-100">
         <div className="p-8">
@@ -132,7 +132,7 @@ const AdminCreateProduct = () => {
               <div className="sm:col-span-2">
                 <h2 className="text-xl font-bold mb-4 text-gray-900 pb-2 border-b border-gray-200">Basic Information</h2>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Product Name*
@@ -147,7 +147,7 @@ const AdminCreateProduct = () => {
                   required
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Brand*
@@ -162,14 +162,14 @@ const AdminCreateProduct = () => {
                   required
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Price*
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <span className="text-gray-500">$</span>
+                    <span className="text-gray-500">₹</span>
                   </div>
                   <input
                     type="number"
@@ -183,7 +183,7 @@ const AdminCreateProduct = () => {
                   />
                 </div>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Priority (0-10)
@@ -201,12 +201,12 @@ const AdminCreateProduct = () => {
                   Higher priority products appear first on the homepage
                 </p>
               </div>
-              
+
               {/* Product Details */}
               <div className="sm:col-span-2 mt-4">
                 <h2 className="text-xl font-bold mb-4 text-gray-900 pb-2 border-b border-gray-200">Product Details</h2>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Material*
@@ -226,7 +226,7 @@ const AdminCreateProduct = () => {
                   <option value="Acetate">Acetate</option>
                 </select>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Shape*
@@ -247,7 +247,7 @@ const AdminCreateProduct = () => {
                   <option value="Geometric">Geometric</option>
                 </select>
               </div>
-              
+
               <div className="sm:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Product Image*
@@ -279,7 +279,7 @@ const AdminCreateProduct = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="sm:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Description*
@@ -294,7 +294,7 @@ const AdminCreateProduct = () => {
                   required
                 ></textarea>
               </div>
-              
+
               <div className="sm:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Features (one per line)
@@ -308,11 +308,11 @@ const AdminCreateProduct = () => {
                   placeholder="Enter features, one per line"
                 ></textarea>
               </div>
-              
+
               {/* Add a hidden stock field */}
               <input type="hidden" name="stock" value={formData.stock} />
             </div>
-            
+
             <div className="mt-8 flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3">
               <button
                 type="button"

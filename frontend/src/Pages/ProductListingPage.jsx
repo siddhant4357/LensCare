@@ -1,75 +1,55 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getFrames } from '../services/frameService';
 import { toast } from 'react-toastify';
 import LazyImage from '../components/LazyImage';
 import { getImageUrl } from '../utils/imageUrl';
+import { useData } from '../context/DataContext';
 
 const ProductListingPage = () => {
-  const [products, setProducts] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { products: allProducts, fetchProducts, loading: contextLoading } = useData();
+  const loading = contextLoading.products;
+
+  const [displayedProducts, setDisplayedProducts] = useState([]);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-  
+
   // Updated to store arrays of selected values
   const [filters, setFilters] = useState({
     shapes: [],
     priceRanges: [],
   });
-  
+
   // Pagination states
   const [page, setPage] = useState(1);
-  const [pages, setPages] = useState(1);
-  const [totalProducts, setTotalProducts] = useState(0);
-  
+  const itemsPerPage = 9;
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalProductsCount, setTotalProductsCount] = useState(0);
+
   // Sort state
   const [sortBy, setSortBy] = useState('priority');
-  
+
   // Available filter options
-  const shapes = ['Round', 'Square', 'Aviator', 'Rectangle', 'Cat Eye', 'Oval', 'Oversized'];
+  const shapes = ['Aviator', 'Wayfarer', 'Round', 'Rectangle', 'Square', 'Cat Eye'];
   const priceRanges = [
-    { label: 'Under $150', value: '0-150' },
-    { label: '$150 - $200', value: '150-200' },
-    { label: '$200 - $250', value: '200-250' },
-    { label: 'Over $250', value: '250-1000' }
+    { label: 'Under ₹200', value: '0-200' },
+    { label: '₹200 - ₹400', value: '200-400' },
+    { label: '₹400 - ₹750', value: '400-750' },
+    { label: 'Over ₹750', value: '750-10000' }
   ];
-  
+
+  // Fetch products on mount (if not already cached)
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        const data = await getFrames(page, 9, '', sortBy === 'priority');
-        
-        let sortedFrames = [...data.frames];
-        
-        if (sortBy === 'price-asc') {
-          sortedFrames.sort((a, b) => a.price - b.price);
-        } else if (sortBy === 'price-desc') {
-          sortedFrames.sort((a, b) => b.price - a.price);
-        }
-        
-        setProducts(sortedFrames);
-        setFilteredProducts(sortedFrames);
-        setPages(data.pages);
-        setTotalProducts(data.total);
-      } catch (error) {
-        toast.error('Failed to load products');
-      } finally {
-        setLoading(false);
-      }
-    };
-    
     fetchProducts();
-  }, [page, sortBy]);
-  
-  // Updated filtering logic to handle arrays of selected values
+  }, [fetchProducts]);
+
+  // Filtering, Sorting, and Pagination Logic
   useEffect(() => {
-    let result = products;
-    
+    let result = [...allProducts];
+
+    // 1. Filter
     if (filters.shapes.length > 0) {
       result = result.filter(product => filters.shapes.includes(product.shape));
     }
-    
+
     if (filters.priceRanges.length > 0) {
       result = result.filter(product => {
         return filters.priceRanges.some(range => {
@@ -78,23 +58,48 @@ const ProductListingPage = () => {
         });
       });
     }
-    
-    setFilteredProducts(result);
-  }, [filters, products]);
-  
+
+    // 2. Sort
+    if (sortBy === 'price-asc') {
+      result.sort((a, b) => a.price - b.price);
+    } else if (sortBy === 'price-desc') {
+      result.sort((a, b) => b.price - a.price);
+    } else {
+      // Priority sort (assuming backend sends it sorted, or we sort by priority field if exists)
+      // For now, keep default order or sort by _id/createdAt
+    }
+
+    // Update totals
+    setTotalProductsCount(result.length);
+    setTotalPages(Math.ceil(result.length / itemsPerPage));
+
+    // 3. Paginate
+    const startIndex = (page - 1) * itemsPerPage;
+    const paginatedProducts = result.slice(startIndex, startIndex + itemsPerPage);
+
+    setDisplayedProducts(paginatedProducts);
+
+    // Reset to page 1 if sorting/filtering changes (handled by separate useEffect dependencies?)
+    // Actually, we should reset page when filters change, but not when page changes.
+    // This effect runs on page change too.
+  }, [allProducts, filters, sortBy, page]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setPage(1);
+  }, [filters, sortBy]);
+
   // Updated to handle checkbox changes
   const handleFilterChange = (filterType, value) => {
     setFilters(prev => {
       const currentValues = [...prev[filterType]];
-      
+
       if (currentValues.includes(value)) {
-        // Remove value if already selected
         return {
           ...prev,
           [filterType]: currentValues.filter(item => item !== value)
         };
       } else {
-        // Add value if not selected
         return {
           ...prev,
           [filterType]: [...currentValues, value]
@@ -102,16 +107,16 @@ const ProductListingPage = () => {
       }
     });
   };
-  
+
   const clearFilters = () => {
     setFilters({
       shapes: [],
       priceRanges: []
     });
   };
-  
+
   const handlePageChange = (newPage) => {
-    if (newPage >= 1 && newPage <= pages) {
+    if (newPage >= 1 && newPage <= totalPages) {
       setPage(newPage);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -120,36 +125,35 @@ const ProductListingPage = () => {
   const renderPagination = () => {
     const pageNumbers = [];
     const maxVisiblePages = 5;
-    
+
     let startPage = Math.max(1, page - Math.floor(maxVisiblePages / 2));
-    let endPage = Math.min(pages, startPage + maxVisiblePages - 1);
-    
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
     if (endPage - startPage + 1 < maxVisiblePages) {
       startPage = Math.max(1, endPage - maxVisiblePages + 1);
     }
-    
+
     for (let i = startPage; i <= endPage; i++) {
       pageNumbers.push(i);
     }
-    
+
     return (
       <div className="flex justify-center mt-12">
         <nav className="inline-flex rounded-2xl shadow-lg overflow-hidden">
-          <button 
-            onClick={() => !loading && handlePageChange(page - 1)}
-            disabled={page === 1 || loading}
-            className={`px-5 py-3 ${
-              page === 1 || loading
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                : 'bg-white text-gray-700 hover:bg-gray-50'
-            } font-medium transition-all duration-300`}
+          <button
+            onClick={() => handlePageChange(page - 1)}
+            disabled={page === 1}
+            className={`px-5 py-3 ${page === 1
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              : 'bg-white text-gray-700 hover:bg-gray-50'
+              } font-medium transition-all duration-300`}
           >
             Previous
           </button>
-          
+
           {startPage > 1 && (
             <>
-              <button 
+              <button
                 onClick={() => handlePageChange(1)}
                 className="px-5 py-3 bg-white text-gray-700 hover:bg-gray-50 font-medium transition-all duration-300"
               >
@@ -162,45 +166,43 @@ const ProductListingPage = () => {
               )}
             </>
           )}
-          
+
           {pageNumbers.map(num => (
             <button
               key={num}
               onClick={() => handlePageChange(num)}
-              className={`px-5 py-3 ${
-                num === page 
-                  ? 'bg-black text-white' 
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
-              } font-medium transition-all duration-300`}
+              className={`px-5 py-3 ${num === page
+                ? 'bg-black text-white'
+                : 'bg-white text-gray-700 hover:bg-gray-50'
+                } font-medium transition-all duration-300`}
             >
               {num}
             </button>
           ))}
-          
-          {endPage < pages && (
+
+          {endPage < totalPages && (
             <>
-              {endPage < pages - 1 && (
+              {endPage < totalPages - 1 && (
                 <span className="px-3 py-3 bg-white text-gray-700 flex items-center">
                   ...
                 </span>
               )}
-              <button 
-                onClick={() => handlePageChange(pages)}
+              <button
+                onClick={() => handlePageChange(totalPages)}
                 className="px-5 py-3 bg-white text-gray-700 hover:bg-gray-50 font-medium transition-all duration-300"
               >
-                {pages}
+                {totalPages}
               </button>
             </>
           )}
-          
-          <button 
-            onClick={() => !loading && handlePageChange(page + 1)}
-            disabled={page === pages || loading}
-            className={`px-5 py-3 ${
-              page === pages || loading
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                : 'bg-white text-gray-700 hover:bg-gray-50'
-            } font-medium transition-all duration-300`}
+
+          <button
+            onClick={() => handlePageChange(page + 1)}
+            disabled={page === totalPages}
+            className={`px-5 py-3 ${page === totalPages
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              : 'bg-white text-gray-700 hover:bg-gray-50'
+              } font-medium transition-all duration-300`}
           >
             Next
           </button>
@@ -215,23 +217,23 @@ const ProductListingPage = () => {
       <div className="fixed inset-0 pointer-events-none opacity-5 z-0">
         <div className="absolute top-20 left-10 transform rotate-12">
           <svg width="80" height="40" viewBox="0 0 80 40" fill="currentColor" className="text-gray-900">
-            <path d="M20 20a15 15 0 0 1 30 0 15 15 0 0 1 30 0M5 20h10M65 20h10M35 20h10"/>
+            <path d="M20 20a15 15 0 0 1 30 0 15 15 0 0 1 30 0M5 20h10M65 20h10M35 20h10" />
           </svg>
         </div>
         <div className="absolute top-1/3 right-20 transform -rotate-45">
           <svg width="60" height="30" viewBox="0 0 60 30" fill="currentColor" className="text-gray-900">
-            <path d="M15 15a10 10 0 0 1 20 0 10 10 0 0 1 20 0M5 15h10M45 15h10M25 15h10"/>
+            <path d="M15 15a10 10 0 0 1 20 0 10 10 0 0 1 20 0M5 15h10M45 15h10M25 15h10" />
           </svg>
         </div>
         <div className="absolute bottom-1/3 left-1/4 transform rotate-45">
           <svg width="70" height="35" viewBox="0 0 70 35" fill="currentColor" className="text-gray-900">
-            <path d="M17.5 17.5a12.5 12.5 0 0 1 25 0 12.5 12.5 0 0 1 25 0M5 17.5h12.5M52.5 17.5h12.5M30 17.5h10"/>
+            <path d="M17.5 17.5a12.5 12.5 0 0 1 25 0 12.5 12.5 0 0 1 25 0M5 17.5h12.5M52.5 17.5h12.5M30 17.5h10" />
           </svg>
         </div>
       </div>
 
-     
-      
+
+
       {/* Filters and Products Section */}
       <section className="py-16 bg-gradient-to-b from-gray-50 to-white overflow-hidden">
         <div className="container mx-auto px-6">
@@ -240,8 +242,8 @@ const ProductListingPage = () => {
             <div className="flex justify-between items-center mb-10 animate-fade-in-up">
               <div>
                 <p className="text-gray-500">
-                  Showing <span className="font-medium text-black">{filteredProducts.length}</span> products 
-                  {totalProducts > 0 && <> out of <span className="font-medium text-black">{totalProducts}</span></>}
+                  Showing <span className="font-medium text-black">{displayedProducts.length}</span> products
+                  {totalProductsCount > 0 && <> out of <span className="font-medium text-black">{totalProductsCount}</span></>}
                 </p>
               </div>
               <div className="flex items-center space-x-3">
@@ -251,9 +253,6 @@ const ProductListingPage = () => {
                   value={sortBy}
                   onChange={(e) => {
                     setSortBy(e.target.value);
-                    setPage(1);
-                    setProducts([]);
-                    setFilteredProducts([]);
                   }}
                 >
                   <option value="priority">Featured</option>
@@ -262,7 +261,7 @@ const ProductListingPage = () => {
                 </select>
               </div>
             </div>
-            
+
             {/* Mobile filter button */}
             <div className="lg:hidden mb-6 animate-fade-in-up">
               <button
@@ -282,7 +281,7 @@ const ProductListingPage = () => {
                 <div className="bg-gradient-to-br from-gray-50 to-white rounded-3xl shadow-lg overflow-hidden transform hover:shadow-xl transition-all duration-500 p-8">
                   <div className="flex justify-between items-center mb-6">
                     <h2 className="text-2xl font-bold">Filters</h2>
-                    <button 
+                    <button
                       onClick={clearFilters}
                       className={`text-sm ${filters.shapes.length > 0 || filters.priceRanges.length > 0 ? 'text-black font-medium' : 'text-gray-400'} transition-colors duration-300`}
                       disabled={filters.shapes.length === 0 && filters.priceRanges.length === 0}
@@ -290,7 +289,7 @@ const ProductListingPage = () => {
                       Clear all
                     </button>
                   </div>
-                  
+
                   {/* Shape Filter - UPDATED WITH CHECKBOXES */}
                   <div className="mb-8">
                     <h3 className="text-lg font-medium mb-4">Shape</h3>
@@ -305,9 +304,10 @@ const ProductListingPage = () => {
                               className="w-4 h-4 text-black rounded-sm focus:ring-black focus:ring-1"
                             />
                             <span className="ml-3 text-gray-700">{shape}</span>
+                            {/* Updated count logic to use local allProducts */}
                             {filters.shapes.includes(shape) && (
                               <span className="ml-auto text-xs text-gray-500">
-                                ({products.filter(p => p.shape === shape).length})
+                                ({allProducts.filter(p => p.shape === shape).length})
                               </span>
                             )}
                           </label>
@@ -315,7 +315,7 @@ const ProductListingPage = () => {
                       ))}
                     </div>
                   </div>
-                  
+
                   {/* Price Filter - UPDATED WITH CHECKBOXES */}
                   <div className="mb-8">
                     <h3 className="text-lg font-medium mb-4">Price</h3>
@@ -334,7 +334,7 @@ const ProductListingPage = () => {
                               <span className="ml-auto text-xs text-gray-500">
                                 {(() => {
                                   const [min, max] = range.value.split('-').map(Number);
-                                  return `(${products.filter(p => p.price >= min && p.price <= max).length})`;
+                                  return `(${allProducts.filter(p => p.price >= min && p.price <= max).length})`;
                                 })()}
                               </span>
                             )}
@@ -350,12 +350,12 @@ const ProductListingPage = () => {
                       <h3 className="text-sm font-medium mb-3">Active Filters</h3>
                       <div className="flex flex-wrap gap-2">
                         {filters.shapes.map(shape => (
-                          <div 
-                            key={shape} 
+                          <div
+                            key={shape}
                             className="inline-flex items-center bg-gray-100 rounded-full pl-3 pr-1 py-1 text-sm"
                           >
                             {shape}
-                            <button 
+                            <button
                               onClick={() => handleFilterChange('shapes', shape)}
                               className="ml-1 h-5 w-5 rounded-full inline-flex items-center justify-center text-gray-600 hover:bg-gray-200"
                             >
@@ -366,14 +366,14 @@ const ProductListingPage = () => {
                             </button>
                           </div>
                         ))}
-                        
+
                         {filters.priceRanges.map(range => (
-                          <div 
-                            key={range} 
+                          <div
+                            key={range}
                             className="inline-flex items-center bg-gray-100 rounded-full pl-3 pr-1 py-1 text-sm"
                           >
                             {priceRanges.find(r => r.value === range)?.label || range}
-                            <button 
+                            <button
                               onClick={() => handleFilterChange('priceRanges', range)}
                               className="ml-1 h-5 w-5 rounded-full inline-flex items-center justify-center text-gray-600 hover:bg-gray-200"
                             >
@@ -389,15 +389,15 @@ const ProductListingPage = () => {
                   )}
                 </div>
               </div>
-              
+
               {/* Product grid */}
               <div className="w-full lg:w-3/4">
-                {filteredProducts.length === 0 && !loading ? (
+                {displayedProducts.length === 0 && !loading ? (
                   <div className="bg-gradient-to-br from-gray-50 to-white rounded-3xl shadow-lg p-16 text-center">
                     <div className="text-6xl mb-4">🔍</div>
                     <h3 className="text-2xl font-bold mb-2">No Products Found</h3>
                     <p className="text-gray-600 mb-6">We couldn't find any products matching your filters.</p>
-                    <button 
+                    <button
                       onClick={clearFilters}
                       className="px-8 py-3 bg-black text-white rounded-full font-medium hover:bg-gray-800 transition-all duration-300 transform hover:scale-105"
                     >
@@ -422,14 +422,14 @@ const ProductListingPage = () => {
                             </div>
                           </div>
                         ))
-                      ) : (Array.isArray(filteredProducts) && filteredProducts.length > 0) ? (
-                        filteredProducts.map(product => (
+                      ) : (
+                        displayedProducts.map(product => (
                           <div key={product._id} className="group bg-gradient-to-br from-gray-50 to-white rounded-3xl overflow-hidden shadow-lg transform hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2 animate-fade-in-up">
                             <div className="h-64 bg-gray-100 relative overflow-hidden">
                               {product.images && product.images.length > 0 ? (
-                                <LazyImage 
-                                  src={getImageUrl(product.images[0])} 
-                                  alt={product.name} 
+                                <LazyImage
+                                  src={getImageUrl(product.images[0])}
+                                  alt={product.name}
                                   className="h-full w-full object-cover object-center group-hover:scale-110 transition-transform duration-700"
                                 />
                               ) : (
@@ -448,9 +448,9 @@ const ProductListingPage = () => {
                               <h3 className="font-bold text-xl mb-1 group-hover:text-black transition-colors duration-300">{product.name}</h3>
                               <p className="text-gray-500 mb-4 font-medium">{product.brand}</p>
                               <div className="flex justify-between items-center">
-                                <span className="font-black text-2xl">${product.price.toFixed(2)}</span>
-                                <Link 
-                                  to={`/products/${product._id}`} 
+                                <span className="font-black text-2xl">₹{product.price.toFixed(2)}</span>
+                                <Link
+                                  to={`/products/${product._id}`}
                                   className="bg-black text-white px-5 py-2 rounded-full font-medium hover:bg-gray-800 transition-all duration-300 transform group-hover:scale-105"
                                 >
                                   View
@@ -459,24 +459,11 @@ const ProductListingPage = () => {
                             </div>
                           </div>
                         ))
-                      ) : (
-                        // No products found state
-                        <div className="bg-gradient-to-br from-gray-50 to-white rounded-3xl shadow-lg p-16 text-center">
-                          <div className="text-6xl mb-4">🔍</div>
-                          <h3 className="text-2xl font-bold mb-2">No Products Found</h3>
-                          <p className="text-gray-600 mb-6">We couldn't find any products matching your filters.</p>
-                          <button 
-                            onClick={clearFilters}
-                            className="px-8 py-3 bg-black text-white rounded-full font-medium hover:bg-gray-800 transition-all duration-300 transform hover:scale-105"
-                          >
-                            Clear All Filters
-                          </button>
-                        </div>
                       )}
                     </div>
-                    
+
                     {/* Pagination */}
-                    {!loading && pages > 1 && renderPagination()}
+                    {!loading && totalPages > 1 && renderPagination()}
                   </>
                 )}
               </div>
@@ -484,7 +471,7 @@ const ProductListingPage = () => {
           </div>
         </div>
       </section>
-      
+
       {/* CTA Section */}
       <section className="py-16 bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white relative">
         <div className="absolute inset-0 bg-black/30"></div>

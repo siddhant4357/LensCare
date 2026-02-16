@@ -29,19 +29,19 @@ const ProductDetailPage = () => {
           navigate('/products');
           return;
         }
-        
+
         const data = await getFrameById(id);
         if (!data) {
           toast.error('Product not found');
           navigate('/products');
           return;
         }
-        
+
         setProduct({
           ...data,
           reviews: data.reviews || []
         });
-        
+
         fetchSimilarProducts(data);
       } catch (error) {
         toast.error('Failed to load product details');
@@ -60,7 +60,7 @@ const ProductDetailPage = () => {
       const data = await getFrames(1, 8, currentProduct.brand);
       const frames = Array.isArray(data.frames) ? data.frames : [];
       const otherFrames = frames.filter(frame => frame._id !== currentProduct._id);
-      
+
       const scoredFrames = otherFrames.map(frame => {
         let score = 0;
         if (frame.brand === currentProduct.brand) score += 3;
@@ -70,7 +70,7 @@ const ProductDetailPage = () => {
         if (frame.price >= priceMin && frame.price <= priceMax) score += 1;
         return { ...frame, similarityScore: score };
       });
-      
+
       const sortedFrames = scoredFrames.sort((a, b) => b.similarityScore - a.similarityScore);
       setSimilarProducts(sortedFrames.slice(0, 4));
     } catch (error) {
@@ -90,7 +90,7 @@ const ProductDetailPage = () => {
 
   const handleCloseModal = () => {
     setTryOnModalOpen(false);
-    setTimeout(() => {}, 100);
+    setTimeout(() => { }, 100);
   };
 
   const handleAddToFavorites = async () => {
@@ -100,7 +100,7 @@ const ProductDetailPage = () => {
         navigate('/login');
         return;
       }
-      
+
       await addToFavorites(product._id);
       toast.success('Added to favorites');
     } catch (error) {
@@ -145,17 +145,17 @@ const ProductDetailPage = () => {
       <div className="fixed inset-0 pointer-events-none opacity-5 z-0">
         <div className="absolute top-20 left-10 transform rotate-12">
           <svg width="80" height="40" viewBox="0 0 80 40" fill="currentColor" className="text-gray-900">
-            <path d="M20 20a15 15 0 0 1 30 0 15 15 0 0 1 30 0M5 20h10M65 20h10M35 20h10"/>
+            <path d="M20 20a15 15 0 0 1 30 0 15 15 0 0 1 30 0M5 20h10M65 20h10M35 20h10" />
           </svg>
         </div>
         <div className="absolute top-1/3 right-20 transform -rotate-45">
           <svg width="60" height="30" viewBox="0 0 60 30" fill="currentColor" className="text-gray-900">
-            <path d="M15 15a10 10 0 0 1 20 0 10 10 0 0 1 20 0M5 15h10M45 15h10M25 15h10"/>
+            <path d="M15 15a10 10 0 0 1 20 0 10 10 0 0 1 20 0M5 15h10M45 15h10M25 15h10" />
           </svg>
         </div>
         <div className="absolute bottom-1/3 left-1/4 transform rotate-45">
           <svg width="70" height="35" viewBox="0 0 70 35" fill="currentColor" className="text-gray-900">
-            <path d="M17.5 17.5a12.5 12.5 0 0 1 25 0 12.5 12.5 0 0 1 25 0M5 17.5h12.5M52.5 17.5h12.5M30 17.5h10"/>
+            <path d="M17.5 17.5a12.5 12.5 0 0 1 25 0 12.5 12.5 0 0 1 25 0M5 17.5h12.5M52.5 17.5h12.5M30 17.5h10" />
           </svg>
         </div>
       </div>
@@ -181,7 +181,7 @@ const ProductDetailPage = () => {
               <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-1">
                 {product.name}
               </h1>
-             
+
             </div>
           </div>
         </div>
@@ -196,8 +196,8 @@ const ProductDetailPage = () => {
               <div className="lg:w-1/2 animate-fade-in-up">
                 <div className="bg-gradient-to-br from-gray-50 to-white rounded-3xl shadow-xl overflow-hidden h-[500px] mb-6 group">
                   {product.images && product.images.length > 0 ? (
-                    <img 
-                      src={getImageUrl(product.images[selectedImage])} 
+                    <img
+                      src={getImageUrl(product.images[selectedImage])}
                       alt={product.name}
                       className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-700"
                     />
@@ -214,14 +214,14 @@ const ProductDetailPage = () => {
                 {product.images && product.images.length > 1 && (
                   <div className="grid grid-cols-4 gap-4">
                     {product.images.map((image, index) => (
-                      <div 
+                      <div
                         key={index}
                         className={`bg-gray-100 rounded-xl cursor-pointer h-24 overflow-hidden transform transition-all duration-300 
                           ${selectedImage === index ? 'ring-2 ring-black scale-105' : 'hover:scale-105'}`}
                         onClick={() => setSelectedImage(index)}
                       >
-                        <img 
-                          src={getImageUrl(image)} 
+                        <img
+                          src={getImageUrl(image)}
                           alt={`${product.name} thumbnail ${index + 1}`}
                           className="w-full h-full object-cover"
                         />
@@ -249,7 +249,7 @@ const ProductDetailPage = () => {
 
                   <div className="text-3xl font-black mb-8">
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-black via-gray-700 to-gray-500">
-                      ${product.price.toFixed(2)}
+                      ₹{product.price.toFixed(2)}
                     </span>
                   </div>
 
@@ -264,19 +264,19 @@ const ProductDetailPage = () => {
                         <span className="text-gray-500 text-sm block mb-1">Shape</span>
                         <span className="font-semibold text-lg">{product.shape}</span>
                       </div>
-                    
+
                     </div>
                   </div>
 
                   {/* Action Buttons */}
                   <div className="mb-8 space-y-4">
-                    <button 
+                    <button
                       onClick={handleAddToFavorites}
                       className="w-full bg-black text-white py-4 rounded-full font-bold text-lg hover:bg-gray-800 transition-all duration-300 transform hover:scale-105"
                     >
                       Add to Favorites
                     </button>
-                    
+
                     {/* Virtual Try-On Button */}
                     <button
                       onClick={() => setTryOnModalOpen(true)}
@@ -288,7 +288,7 @@ const ProductDetailPage = () => {
                       </svg>
                       Try On Virtually
                     </button>
-                    
+
                     <Link to="/book-appointment" className="block w-full text-center bg-gradient-to-r from-gray-700 via-gray-800 to-black text-white py-4 rounded-full font-bold text-lg hover:from-black hover:to-gray-700 transition-all duration-300 transform hover:scale-105">
                       Book a Fitting Appointment
                     </Link>
@@ -300,8 +300,8 @@ const ProductDetailPage = () => {
                       <button
                         onClick={() => setActiveTab('description')}
                         className={`py-3 px-6 rounded-full font-medium text-sm transition-all duration-300 transform mr-4
-                          ${activeTab === 'description' 
-                            ? 'bg-black text-white' 
+                          ${activeTab === 'description'
+                            ? 'bg-black text-white'
                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                       >
                         Description
@@ -309,8 +309,8 @@ const ProductDetailPage = () => {
                       <button
                         onClick={() => setActiveTab('features')}
                         className={`py-3 px-6 rounded-full font-medium text-sm transition-all duration-300 transform
-                          ${activeTab === 'features' 
-                            ? 'bg-black text-white' 
+                          ${activeTab === 'features'
+                            ? 'bg-black text-white'
                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                       >
                         Features
@@ -353,7 +353,7 @@ const ProductDetailPage = () => {
             <div className="w-20 h-1 bg-black mx-auto mb-6"></div>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">Discover more frames that match your style</p>
           </div>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
             {recommendationsLoading ? (
               Array(4).fill().map((_, index) => (
@@ -374,9 +374,9 @@ const ProductDetailPage = () => {
                 <div key={frame._id} className="group bg-gradient-to-br from-gray-50 to-white rounded-3xl overflow-hidden shadow-lg transform hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
                   <div className="h-64 bg-gray-100 relative overflow-hidden">
                     {frame.images && frame.images.length > 0 ? (
-                      <img 
-                        src={getImageUrl(frame.images[0])} 
-                        alt={frame.name} 
+                      <img
+                        src={getImageUrl(frame.images[0])}
+                        alt={frame.name}
                         className="h-full w-full object-cover object-center group-hover:scale-110 transition-transform duration-700"
                       />
                     ) : (
@@ -395,9 +395,9 @@ const ProductDetailPage = () => {
                     <h3 className="font-bold text-xl mb-1 group-hover:text-black transition-colors duration-300">{frame.name}</h3>
                     <p className="text-gray-500 mb-4 font-medium">{frame.brand}</p>
                     <div className="flex justify-between items-center">
-                      <span className="font-black text-2xl">${frame.price.toFixed(2)}</span>
-                      <Link 
-                        to={`/products/${frame._id}`} 
+                      <span className="font-black text-2xl">₹{frame.price.toFixed(2)}</span>
+                      <Link
+                        to={`/products/${frame._id}`}
                         className="bg-black text-white px-5 py-2 rounded-full font-medium hover:bg-gray-800 transition-all duration-300 transform group-hover:scale-105"
                       >
                         View
