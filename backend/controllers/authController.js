@@ -111,7 +111,7 @@ const updateUserProfile = async (req, res) => {
     if (req.body.name) user.name = req.body.name;
     if (req.body.phone) user.phone = req.body.phone;
     if (req.body.address) user.address = req.body.address;
-    
+
     // If password is provided, hash and update it
     if (req.body.password) {
       user.password = req.body.password;
@@ -119,7 +119,7 @@ const updateUserProfile = async (req, res) => {
 
     // Handle profile picture upload
     if (req.file) {
-      user.profilePicture = `/uploads/${req.file.filename}`;
+      user.profilePicture = req.file.path;
     }
 
     const updatedUser = await user.save();
@@ -139,9 +139,9 @@ const updateUserProfile = async (req, res) => {
   }
 };
 
-module.exports = { 
-  registerUser, 
-  loginUser, 
+module.exports = {
+  registerUser,
+  loginUser,
   getUserProfile,
-  updateUserProfile 
+  updateUserProfile
 };

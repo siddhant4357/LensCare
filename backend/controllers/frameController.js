@@ -10,7 +10,7 @@ const getFrames = async (req, res) => {
     const skip = (page - 1) * limit;
     const keyword = req.query.keyword || '';
     const prioritySort = req.query.prioritySort !== 'false'; // Default to true
-    
+
     // Build query
     const query = {};
     if (keyword) {
@@ -20,7 +20,7 @@ const getFrames = async (req, res) => {
         { shape: { $regex: keyword, $options: 'i' } },
       ];
     }
-    
+
     // Define sort order based on prioritySort parameter
     let sortOrder = {};
     if (prioritySort) {
@@ -30,17 +30,17 @@ const getFrames = async (req, res) => {
       // Default sort by creation date
       sortOrder = { createdAt: -1 };
     }
-    
+
     // Execute query with pagination
     const frames = await Frame.find(query)
       .sort(sortOrder)
       .skip(skip)
       .limit(limit);
-    
+
     // Get total count for pagination
     const total = await Frame.countDocuments(query);
     const pages = Math.ceil(total / limit);
-    
+
     res.json({
       frames,
       page,
@@ -76,9 +76,9 @@ const getFrameById = async (req, res) => {
 const createFrame = async (req, res) => {
   try {
     const { name, brand, shape, price, description, features, stock, colors, priority } = req.body;
-    
-    // Get image paths from multer
-    const images = req.files.map(file => `/uploads/${file.filename}`);
+
+    // Get image paths from Cloudinary
+    const images = req.files.map(file => file.path);
 
     const frame = new Frame({
       name,
@@ -122,7 +122,7 @@ const updateFrame = async (req, res) => {
 
       // Add new images if they exist
       if (req.files && req.files.length > 0) {
-        const newImages = req.files.map(file => `/uploads/${file.filename}`);
+        const newImages = req.files.map(file => file.path);
         frame.images = [...frame.images, ...newImages];
       }
 
@@ -191,28 +191,28 @@ const createFrameReview = async (req, res) => {
 const updateFramePriority = async (req, res) => {
   try {
     const { priority } = req.body;
-    
+
     // Validate priority
     if (priority === undefined || priority === null) {
       return res.status(400).json({ message: 'Priority is required' });
     }
-    
+
     // Convert to number and validate
     const priorityNum = Number(priority);
     if (isNaN(priorityNum)) {
       return res.status(400).json({ message: 'Priority must be a valid number' });
     }
-    
+
     const frame = await Frame.findById(req.params.id);
-    
+
     if (!frame) {
       return res.status(404).json({ message: 'Frame not found' });
     }
-    
+
     // Set priority as a number
     frame.priority = priorityNum;
     const updatedFrame = await frame.save();
-    
+
     res.json(updatedFrame);
   } catch (error) {
     console.error('Priority update error:', error);

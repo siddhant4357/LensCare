@@ -1,0 +1,4 @@
+# Server-side
+node_modules
+.env
+uploads
