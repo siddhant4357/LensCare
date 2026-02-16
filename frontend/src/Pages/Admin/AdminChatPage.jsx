@@ -63,20 +63,28 @@ const AdminChatPage = () => {
     };
   }, [socket, user]);
 
-  // Scroll to bottom when messages change
+  // Scroll to bottom only on new selection or sending message
   useEffect(() => {
-    // Using a small timeout to ensure DOM is updated
-    const timer = setTimeout(() => {
-      if (messagesEndRef.current) {
-        messagesEndRef.current.scrollIntoView({
-          behavior: 'smooth',
-          block: 'end'
-        });
-      }
-    }, 100);
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'end'
+      });
+    }
+  }, [selectedUser]); // Only scroll on user switch
 
-    return () => clearTimeout(timer);
-  }, [selectedUser, activeConversations]);
+  // Auto-scroll on new messages ONLY if already near bottom
+  useEffect(() => {
+    if (messagesContainerRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
+      // Check if user is near bottom (within 200px)
+      const isNearBottom = scrollHeight - scrollTop - clientHeight < 200;
+
+      if (isNearBottom && messagesEndRef.current) {
+        messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  }, [activeConversations]);
 
   const sendMessage = (e) => {
     e.preventDefault();
@@ -93,7 +101,7 @@ const AdminChatPage = () => {
       socket.emit('adminMessage', messageData);
       setNewMessage('');
 
-      // Update local state for immediate display
+      // Update local state and force scroll
       setActiveConversations(prev => {
         const updatedConversations = { ...prev };
         if (updatedConversations[selectedUser]) {
@@ -101,6 +109,11 @@ const AdminChatPage = () => {
         }
         return updatedConversations;
       });
+
+      // Force scroll to bottom when admin sends
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 50);
     }
   };
 
@@ -126,40 +139,37 @@ const AdminChatPage = () => {
   // Count unread conversations
   const unreadCount = Object.values(activeConversations).filter(conv => conv.unread).length;
 
-  // Calculate height for chat area
-  const chatHeight = 'calc(100vh - 200px)';
+  // Calculate height for chat area using dvh for mobile browsers
+  const chatHeight = 'calc(100dvh - 140px)';
 
   return (
-    <div className="min-h-screen py-6 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-white">
+    <div className="min-h-screen py-4 md:py-6 px-2 md:px-4 lg:px-8 bg-gradient-to-b from-gray-50 to-white overflow-hidden max-h-screen">
       {/* Page Header */}
-      <div className="mb-4 md:mb-8">
+      <div className="mb-2 md:mb-4 shrink-0">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-2xl md:text-3xl lg:text-4xl font-black mb-2 text-gray-900">
+            <h1 className="text-xl md:text-3xl lg:text-4xl font-black mb-1 md:mb-2 text-gray-900">
               Customer
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-black via-gray-800 to-gray-600 ml-3">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-black via-gray-800 to-gray-600 ml-2 md:ml-3">
                 Support
               </span>
             </h1>
-            <div className="w-20 h-1 bg-black mb-2 md:mb-4"></div>
-            <p className="text-sm md:text-base text-gray-600 max-w-3xl hidden md:block">
-              Manage real-time customer conversations and provide timely assistance
-            </p>
+            <div className="w-20 h-1 bg-black mb-2 hidden md:block"></div>
           </div>
 
-          {/* Mobile toggle button - Only visible on mobile/tablet when list is hidden */}
+          {/* Mobile toggle button */}
           {!isMobileMenuOpen && selectedUser && (
             <button
-              className="md:hidden mt-2 flex items-center px-4 py-2 bg-black text-white rounded-xl text-sm"
+              className="md:hidden self-start mb-2 flex items-center px-3 py-1.5 bg-black text-white rounded-lg text-xs"
               onClick={() => {
                 setSelectedUser(null);
                 setIsMobileMenuOpen(true);
               }}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
-              Back to List
+              Back
             </button>
           )}
         </div>
@@ -168,7 +178,7 @@ const AdminChatPage = () => {
 
 
       {/* Main Chat Interface */}
-      <div className="bg-white rounded-3xl shadow-lg overflow-hidden border border-gray-100 flex flex-col md:flex-row" style={{ height: chatHeight }}>
+      <div className="bg-white rounded-2xl md:rounded-3xl shadow-lg overflow-hidden border border-gray-100 flex flex-col md:flex-row" style={{ height: chatHeight }}>
         {/* Sidebar - Users List */}
         <div className={`
           w-full md:w-1/3 lg:w-1/4 xl:w-1/5 bg-gray-50 border-r border-gray-200 flex flex-col

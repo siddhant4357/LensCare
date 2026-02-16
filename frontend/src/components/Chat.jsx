@@ -173,7 +173,7 @@ const Chat = () => {
   }
 
   return (
-    <div className="fixed bottom-4 right-4 left-4 md:left-auto md:bottom-6 md:right-6 w-auto md:w-96 h-[80vh] md:h-[32rem] bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden z-50 border border-gray-100 backdrop-blur-lg">
+    <div className="fixed bottom-4 right-4 left-4 md:left-auto md:bottom-6 md:right-6 w-auto md:w-96 h-[75dvh] md:h-[32rem] bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden z-50 border border-gray-100 backdrop-blur-lg safe-area-bottom">
       {/* Header with gradient background */}
       <div className="bg-gradient-to-r from-black via-gray-900 to-black text-white p-6 relative overflow-hidden">
         {/* Background pattern */}
@@ -217,12 +217,12 @@ const Chat = () => {
             >
               <div
                 className={`max-w-3/4 rounded-2xl p-4 shadow-lg transform transition-all duration-300 hover:scale-105 ${msg.userId === (user?._id || 'guest')
-                    ? 'bg-gradient-to-br from-black via-gray-900 to-black text-white'
-                    : msg.type === 'system'
-                      ? 'bg-gradient-to-r from-blue-50 to-blue-100 border-l-4 border-blue-500 text-blue-900'
-                      : msg.type === 'appointment'
-                        ? 'bg-gradient-to-r from-green-50 to-green-100 border-l-4 border-green-500 text-green-900'
-                        : 'bg-white border border-gray-200 shadow-md'
+                  ? 'bg-gradient-to-br from-black via-gray-900 to-black text-white'
+                  : msg.type === 'system'
+                    ? 'bg-gradient-to-r from-blue-50 to-blue-100 border-l-4 border-blue-500 text-blue-900'
+                    : msg.type === 'appointment'
+                      ? 'bg-gradient-to-r from-green-50 to-green-100 border-l-4 border-green-500 text-green-900'
+                      : 'bg-white border border-gray-200 shadow-md'
                   }`}
               >
                 <p className="text-sm leading-relaxed font-medium">{msg.content}</p>

@@ -2,7 +2,6 @@
 
 Experience the future of eyewear shopping with Virtual Try-On, Real-time Support, and a premium curated collection.
 
-![LensCare Homepage](/frontend/public/vite.svg) *Note: Replace with actual screenshot*
 
 ## ⚡ Powered by MERN Stack • Virtual Try-On • Real-time Chat ⚡
 
